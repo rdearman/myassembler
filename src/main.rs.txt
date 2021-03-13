@@ -1,0 +1,169 @@
+use std::fs::File;
+use std::io::{BufRead, BufReader};
+use logos::{Logos, Lexer};
+
+#[derive(Logos, Debug, PartialEq)]
+enum Token {
+    // Tokens can be literal strings, of any length.
+    #[regex("[;]+.*", logos::skip)]
+    #[regex("[[/]{2}.*]", logos::skip)]
+    COMMENT,
+
+    #[token("[")]
+    SquareBracketOpen,
+
+    #[token("]")]
+    SquareBracketClose,
+
+    #[token("{")]
+    CurlyBracketOpen,
+
+    #[token("}")]
+    CurlyBracketClose,
+
+    #[regex("[[:word:]]+:")]
+    LABEL,
+
+    #[regex("=[[:word:]]+")]
+    MEMORYALIAS,
+
+    #[regex("#([[:digit:]]+)")]
+    IMMEDIATE,
+
+    #[token("mov", ignore(ascii_case))]
+    MOV,
+
+    #[token("add", ignore(ascii_case))]
+    ADD,
+
+    #[token("sub", ignore(ascii_case))]
+    SUB,
+
+    #[token("and", ignore(ascii_case))]
+    AND,
+
+    #[token("ORR", ignore(ascii_case))]
+    ORR,
+
+    #[token("XOR", ignore(ascii_case))]
+    XOR,
+
+    #[token("not", ignore(ascii_case))]
+    NOT,
+
+    #[token("CMP", ignore(ascii_case))]
+    CMP,
+
+    #[token("LDR", ignore(ascii_case))]
+    LDR,
+
+    #[token("STR", ignore(ascii_case))]
+    STR,
+
+    #[token("SHR", ignore(ascii_case))]
+    SHR,
+
+    #[token("SHL", ignore(ascii_case))]
+    SHL,
+
+    #[token("INC", ignore(ascii_case))]
+    INC,
+
+    #[token("DEC", ignore(ascii_case))]
+    DEC,
+
+    #[token("CCF", ignore(ascii_case))]
+    CCF,
+
+    #[regex("(bl[[:space:]]+[[:word:]]+)", bl_jmp, priority = 1, ignore(ascii_case))]
+    BL,
+
+    #[regex("(beq[[:space:]]+[[:word:]]+)", priority = 1, ignore(ascii_case))]
+    BEQ,
+
+    #[regex("(bne[[:space:]]+[[:word:]]+)", priority = 1, ignore(ascii_case))]
+    BNE,
+
+    #[regex("(blt[[:space:]]+[[:word:]]+)", priority = 1, ignore(ascii_case))]
+    BLT,
+
+    #[regex("(bgt[[:space:]]+[[:word:]]+)", priority = 1, ignore(ascii_case))]
+    BGT,
+
+    #[token("pop", ignore(ascii_case))]
+    POP,
+
+    #[token("push", ignore(ascii_case))]
+    PUSH,
+
+
+    #[token("r1", ignore(ascii_case))]
+    R1,
+
+    #[token("r2", ignore(ascii_case))]
+    R2,
+
+    #[token("r3", ignore(ascii_case))]
+    R3,
+
+    #[token("r4", ignore(ascii_case))]
+    R4,
+
+    #[token("ir", ignore(ascii_case))]
+    IR,
+
+    #[token("PC", ignore(ascii_case))]
+    PC,
+
+    #[token(".")]
+    Period,
+
+    #[token(",")]
+    COMMA,
+
+
+    // Or regular expressions.
+    #[regex("[[:word:]]+", priority = 2)]
+    JMPLOC,
+
+    // Logos requires one token variant to handle errors,
+    // it can be named anything you wish.
+    #[error]
+    // We can also use this variant to define whitespace,
+    // or any other matches we wish to skip.
+    #[regex(r"[ \t\n\f]+", logos::skip)]
+    Error,
+}
+
+fn bl_jmp(lex: &mut Lexer<Token>) -> String
+{
+    let slice = lex.slice();
+    let myString:String = slice[..slice.len()-1].to_string();
+    println!("FROM FUNCTION: {:?}", myString);
+    return myString;
+}
+
+fn main() {
+    let filename = "/home/rick/rustplay/myassembler/tester.s";
+    // Open the file in read-only mode (ignoring errors).
+    let file = File::open(filename).unwrap();
+    let reader = BufReader::new(file);
+
+    // Read the file line by line using the lines() iterator from std::io::BufRead.
+    for line in reader.lines()
+    {
+        let tline = &line.unwrap();
+        let lex = Token::lexer( tline ); 
+        for elem in lex
+        {
+            // match elem
+            // {
+            //     Token::BL => println!("{:?}", elem),
+            //     Token::BEQ => println!("{:?}", elem),
+            //     Token::BLT => println!("{:?}", elem),
+            //     Token::BGT => println!("{:?}", elem),
+            //     _  => println!("{:?}", "Default"),
+            // }
+        } 
+    }
+ }
