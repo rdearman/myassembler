@@ -1,8 +1,10 @@
 #![allow(non_snake_case)]
 #![allow(unused_imports)]
+#[allow(dead_code)]
 
 mod bindings;
 mod lexer;
+mod instruction;
 use std::fs::File;
 use std::io::Write;   
 use std::io::{BufRead, BufReader, BufWriter};
@@ -10,22 +12,24 @@ use logos::{Logos, Lexer};
 extern crate clap;
 use clap::{Arg, App, SubCommand};
 
+static MAXMEMORY: u8 = 255;
+
 fn main()
 {
     let matches = App::new("myassembler")
                     .version("0.1.0")
                     .author("Rick Dearman <rick@rdearman.org>")
                     .about("Generates binary file for my 8-bit breadboard computer")
-                    // .arg(Arg::with_name("IN")
-                    //     .help("Sets the input file to use")
-                    //     .index(1))
+                    //.setting(AppSettings::ArgRequiredElseHelp)
                     .arg(Arg::with_name("input")
+                        .required(true)
                         .short("i")
                         .long("input")
                         .value_name("INFILE")
                         .help("Sets the input file name")
                         .takes_value(true))
                     .arg(Arg::with_name("output")
+                        .required(true)
                         .short("o")
                         .long("output")
                         .value_name("OUTFILE")
@@ -34,12 +38,15 @@ fn main()
                         .takes_value(true))
                     .get_matches();
 
+
     let filename = matches.value_of("input").unwrap();
     //let filename = matches.value_of("input").unwrap_or(matches.value_of("IN").unwrap());
     let mut bfile = BufWriter::new(File::create(matches.value_of("output").unwrap()).unwrap());
     let file = File::open(filename).unwrap();
     let reader = BufReader::new(file);
     let mut opcodes_vector: Vec::<u8> = vec![];
+
+/*   Block for writing out buffer 
 
     opcodes_vector.push( bindings::eOpcodes_opcode_nop);
     opcodes_vector.push( bindings::eOpcodes_opcode_mov_r2_r4);
@@ -48,7 +55,7 @@ fn main()
 
     let opcode_buffer: &[u8] = &opcodes_vector;
 
-    bfile.write_all(opcode_buffer).unwrap();
+    bfile.write_all(opcode_buffer).unwrap(); */
 
     // Read the file line by line using the lines() iterator from std::io::BufRead.
     for line in reader.lines()
@@ -82,7 +89,9 @@ fn main()
                 Token::MEMORYALIAS(_) => println!("{:?}", elem),
                 Token::PUSH(_) => println!("{:?}", elem),
                 Token::POP(_)  => println!("{:?}", elem),
-                //Token::COMMENT  => (),
+                Token::LABEL(_)  => println!("{:?}", elem),
+                // Token::MULTILINECOMMENT  => println!("{:?}", elem),
+                // Token::COMMENT  => (),
                 _  => (),
             }
         }
@@ -212,7 +221,10 @@ enum Token {
     #[regex("[;]+.*", logos::skip)]
     #[regex("[[/]{2}.*]", logos::skip)]
     COMMENT,
-    
+
+    #[regex(r"(?s)/\*.*\*/", logos::skip)]
+    MULTILINECOMMENT,
+
     // Logos requires one token variant to handle errors,
     // it can be named anything you wish.
     #[error]
