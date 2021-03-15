@@ -12,7 +12,7 @@ use logos::{Logos, Lexer};
 extern crate clap;
 use clap::{Arg, App, SubCommand};
 
-static MAXMEMORY: u8 = 255;
+static MAXMEMORY: u16 = 255;
 
 fn main()
 {
@@ -44,7 +44,7 @@ fn main()
     let mut bfile = BufWriter::new(File::create(matches.value_of("output").unwrap()).unwrap());
     let file = File::open(filename).unwrap();
     let reader = BufReader::new(file);
-    let mut opcodes_vector: Vec::<u8> = vec![];
+    let mut opcodes_vector: Vec::<u16> = vec![];
 
 /*   Block for writing out buffer 
 
@@ -53,7 +53,7 @@ fn main()
     opcodes_vector.push( bindings::eOpcodes_opcode_mov_sp_r4);
     opcodes_vector.push( bindings::eOpcodes_opcode_mov_mr_r4);
 
-    let opcode_buffer: &[u8] = &opcodes_vector;
+    let opcode_buffer: &[u16] = &opcodes_vector;
 
     bfile.write_all(opcode_buffer).unwrap(); */
 
