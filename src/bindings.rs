@@ -141,5 +141,5 @@ pub const eOpcodes_opcode_r1_latch: eOpcodes = 133;
 pub const eOpcodes_opcode_r2_latch: eOpcodes = 134;
 pub const eOpcodes_opcode_r3_latch: eOpcodes = 135;
 pub const eOpcodes_opcode_r4_latch: eOpcodes = 136;
-pub type eOpcodes = ::std::os::raw::c_uchar ;
+pub type eOpcodes = ::std::os::raw::c_ushort ; // u16
 // pub type eOpcodes = ::std::os::raw::c_uint;

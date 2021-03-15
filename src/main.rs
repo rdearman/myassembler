@@ -12,7 +12,7 @@ use logos::{Logos, Lexer};
 extern crate clap;
 use clap::{Arg, App, SubCommand};
 
-static MAXMEMORY: u16 = 255;
+// static MAXMEMORY: u16 = 255;
 
 fn main()
 {
