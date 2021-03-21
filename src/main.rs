@@ -11,8 +11,10 @@ use std::io::{BufRead, BufReader, BufWriter};
 use logos::{Logos, Lexer};
 extern crate clap;
 use clap::{Arg, App, SubCommand};
+extern crate regex;
+use regex::Regex;
+use instruction::{Label, OperationalCode};
 
-// static MAXMEMORY: u16 = 255;
 
 fn main()
 {
@@ -38,15 +40,75 @@ fn main()
                         .takes_value(true))
                     .get_matches();
 
-
     let filename = matches.value_of("input").unwrap();
     //let filename = matches.value_of("input").unwrap_or(matches.value_of("IN").unwrap());
     let mut bfile = BufWriter::new(File::create(matches.value_of("output").unwrap()).unwrap());
     let file = File::open(filename).unwrap();
     let reader = BufReader::new(file);
-    let mut opcodes_vector: Vec::<u16> = vec![];
+    let mut opcodes_vector: Vec::<OperationalCode> = vec![];
+    let mut label_vector = vec![];
 
-/*   Block for writing out buffer 
+    // Read the file line by line using the lines() iterator from std::io::BufRead.
+    let mut binloc =0; 
+    for line in reader.lines()
+    {
+        let tline = &line.unwrap();
+        let lex = Token::lexer( tline );
+        for elem in lex
+        {
+             match elem
+            {
+                Token::BL(inner)  =>
+                {
+                    binloc = def_branch(0, inner, binloc, &mut label_vector, &mut opcodes_vector) ;
+                },
+                Token::BEQ(inner) =>
+                {
+                    def_branch(1, inner, binloc, &mut label_vector, &mut opcodes_vector) ;
+                },
+                Token::BNE(inner)  =>
+                {
+                    def_branch(2, inner, binloc, &mut label_vector, &mut opcodes_vector) ;
+                },
+                 Token::BLT(inner) =>
+                {
+                    def_branch(3, inner, binloc, &mut label_vector, &mut opcodes_vector) ;
+                },
+                Token::BGT(inner) =>
+                {
+                    def_branch(4, inner, binloc, &mut label_vector, &mut opcodes_vector) ;
+                },
+
+                // Token::ADD(inner)  => println!("{:?}", inner),
+                // Token::SUB(inner) => println!("{:?}", inner),
+                // Token::AND(inner) => println!("{:?}", inner),
+                // Token::ORR(inner) => println!("{:?}", inner),
+                // Token::XOR(inner)  => println!("{:?}", inner),
+                // Token::NOT(inner) => println!("{:?}", inner),
+                // Token::CMP(inner) => println!("{:?}", inner),
+                // Token::MOV(inner) => println!("{:?}", inner),
+                // Token::LDR(inner)  => println!("{:?}", inner),
+                // Token::STR(inner) => println!("{:?}", inner),
+                // Token::SHR(inner) => println!("{:?}", inner),
+                // Token::SHL(inner) => println!("{:?}", inner),
+                // Token::INC(inner)  => println!("{:?}", inner),
+                // Token::DEC(inner) => println!("{:?}", inner),
+                // Token::CCF => println!("{:?}", elem),
+                // Token::MEMORYALIAS(inner) => println!("{:?}", inner),
+                // Token::PUSH(inner) => println!("{:?}", inner),
+                // Token::POP(inner)  => println!("{:?}", inner),
+                Token::LABEL(inner)  => { 
+                    label_vector.push(def_label(inner, binloc));
+                    binloc += 1;
+                    },
+                _  => (),
+            }
+        }
+        // binloc += 1;
+    }
+
+
+    /*   Block for writing out buffer 
 
     opcodes_vector.push( bindings::eOpcodes_opcode_nop);
     opcodes_vector.push( bindings::eOpcodes_opcode_mov_r2_r4);
@@ -57,45 +119,149 @@ fn main()
 
     bfile.write_all(opcode_buffer).unwrap(); */
 
-    // Read the file line by line using the lines() iterator from std::io::BufRead.
-    for line in reader.lines()
+}
+
+
+fn def_branch(instruction: i32, elem: String, binloc: u16, label_list: &mut Vec<Label>, opcodes_vector: &mut Vec::<OperationalCode>) -> u16
+{
+    // let mut branch_opcode: OperationalCode = OperationalCode::new(bindings::eOpcodes_opcode_zero_flag + binloc, binloc);
+    // let mut no_branch_opcode: OperationalCode = OperationalCode::new(binloc, binloc);
+
+    // opcodes_vector.push(bindings::OperationalCode::new((binloc), bindings::eOpcodes_opcode_fetch_instruction);
+    //opcodes_vector.push(bindings::eOpcodes_opcode_load_instruction);
+
+    match instruction
     {
-        let tline = &line.unwrap();
-        // println!("{:?}", tline);
-        let lex = Token::lexer( tline );
-        for elem in lex
-        {
-            match elem
+        0 => {
+            // println!("INSIDE BL: {:?}", elem );
+            let rx = Regex::new(r".*[[:space:]]([[:word:]]+)").unwrap();
+            let matched_string = &rx.captures(&elem).unwrap()[1];
+            for item in label_list.iter_mut()
             {
-                Token::BL(_)  => println!("{:?}", elem),
-                Token::BEQ(_) => println!("{:?}", elem),
-                Token::BLT(_) => println!("{:?}", elem),
-                Token::BGT(_) => println!("{:?}", elem),
-                Token::ADD(_)  => println!("{:?}", elem),
-                Token::SUB(_) => println!("{:?}", elem),
-                Token::AND(_) => println!("{:?}", elem),
-                Token::ORR(_) => println!("{:?}", elem),
-                Token::XOR(_)  => println!("{:?}", elem),
-                Token::NOT(_) => println!("{:?}", elem),
-                Token::CMP(_) => println!("{:?}", elem),
-                Token::MOV(_) => println!("{:?}", elem),
-                Token::LDR(_)  => println!("{:?}", elem),
-                Token::STR(_) => println!("{:?}", elem),
-                Token::SHR(_) => println!("{:?}", elem),
-                Token::SHL(_) => println!("{:?}", elem),
-                Token::INC(_)  => println!("{:?}", elem),
-                Token::DEC(_) => println!("{:?}", elem),
-                Token::CCF => println!("{:?}", elem),
-                Token::MEMORYALIAS(_) => println!("{:?}", elem),
-                Token::PUSH(_) => println!("{:?}", elem),
-                Token::POP(_)  => println!("{:?}", elem),
-                Token::LABEL(_)  => println!("{:?}", elem),
-                // Token::MULTILINECOMMENT  => println!("{:?}", elem),
-                // Token::COMMENT  => (),
-                _  => (),
+                // println!("item_name: {:?}", item.get_name());
+                // println!("regex_match: {:?}", matched_string);
+                if item.get_name() == matched_string
+                {
+                    // println!("MATCHED LABEL!");
+                    let next_opcode: OperationalCode = OperationalCode::new(binloc, item.get_location());
+                    opcodes_vector.push(next_opcode);
+                    return binloc + 1 as u16;
+                }
             }
-        }
+            let another_opcode: OperationalCode = OperationalCode::new( binloc, binloc + 1 as u16);
+            opcodes_vector.push(another_opcode);
+            return binloc;
+        }, // BL
+        1 => {
+            //println!("INSIDE BEQ: {:?}", elem );
+            let rx = Regex::new(r".*[[:space:]]([[:word:]]+)").unwrap();
+            let matched_string = &rx.captures(&elem).unwrap()[1];
+            for item in label_list.iter_mut()
+            {
+                //println!("BEQ item_name: {:?}", item.get_name());
+                //println!("BEQ regex_match: {:?}", matched_string);
+                if item.get_name() == matched_string
+                {
+                    //println!("MATCHED LABEL!");
+                    let next_opcode: OperationalCode = OperationalCode::new(bindings::eOpcodes_opcode_zero_flag + binloc, item.get_location());
+                    let another_opcode: OperationalCode = OperationalCode::new( binloc, binloc + 1 as u16);
+                    opcodes_vector.push(next_opcode);
+                    opcodes_vector.push(another_opcode);
+                    return binloc + 1 as u16;
+                }
+            }
+            let another_opcode: OperationalCode = OperationalCode::new( binloc, binloc + 1 as u16);
+            opcodes_vector.push(another_opcode);
+            return binloc ;
+        }, // BEQ zero flag set
+        2 => {
+            //println!("INSIDE BEQ: {:?}", elem );
+            let rx = Regex::new(r".*[[:space:]]([[:word:]]+)").unwrap();
+            let matched_string = &rx.captures(&elem).unwrap()[1];
+            for item in label_list.iter_mut()
+            {
+                //println!("BEQ item_name: {:?}", item.get_name());
+                //println!("BEQ regex_match: {:?}", matched_string);
+                if item.get_name() == matched_string
+                {
+                    //println!("MATCHED LABEL!");
+                    let next_opcode: OperationalCode = OperationalCode::new(binloc, item.get_location());
+                    let another_opcode: OperationalCode = OperationalCode::new( bindings::eOpcodes_opcode_zero_flag + binloc, binloc + 1 as u16);
+                    opcodes_vector.push(next_opcode);
+                    opcodes_vector.push(another_opcode);
+                    return binloc + 1 as u16;
+                }
+            }
+            let another_opcode: OperationalCode = OperationalCode::new( binloc, binloc + 1 as u16);
+            opcodes_vector.push(another_opcode);
+            return binloc ;
+        }, // BNE Zflag not set
+        3 => {
+            //println!("INSIDE BLT: {:?}", elem );
+            let rx = Regex::new(r".*[[:space:]]([[:word:]]+)").unwrap();
+            let matched_string = &rx.captures(&elem).unwrap()[1];
+            for item in label_list.iter_mut()
+            {
+                //println!("BEQ item_name: {:?}", item.get_name());
+                //println!("BEQ regex_match: {:?}", matched_string);
+                if item.get_name() == matched_string
+                {
+                    //println!("MATCHED LABEL!");
+                    let next_opcode: OperationalCode = OperationalCode::new(bindings::eOpcodes_opcode_zero_flag + binloc, item.get_location());
+                    let another_opcode: OperationalCode = OperationalCode::new( bindings::eOpcodes_opcode_carryout_flag + binloc, binloc + 1 as u16);
+                    opcodes_vector.push(next_opcode);
+                    opcodes_vector.push(another_opcode);
+                    return binloc + 1 as u16;
+                }
+            }
+            let another_opcode: OperationalCode = OperationalCode::new( bindings::eOpcodes_opcode_carryout_flag + binloc, binloc + 1 as u16);
+            opcodes_vector.push(another_opcode);
+            return binloc ;
+        }, // BLT zero flag set and carry flag not
+        4 => {
+            //println!("INSIDE BLT: {:?}", elem );
+            let rx = Regex::new(r".*[[:space:]]([[:word:]]+)").unwrap();
+            let matched_string = &rx.captures(&elem).unwrap()[1];
+            for item in label_list.iter_mut()
+            {
+                //println!("BEQ item_name: {:?}", item.get_name());
+                //println!("BEQ regex_match: {:?}", matched_string);
+                if item.get_name() == matched_string
+                {
+                    //println!("MATCHED LABEL!");
+                    let next_opcode: OperationalCode = OperationalCode::new( bindings::eOpcodes_opcode_carryout_flag + binloc, item.get_location());
+                    let another_opcode: OperationalCode = OperationalCode::new( bindings::eOpcodes_opcode_zero_flag + binloc, binloc + 1 as u16);
+                    opcodes_vector.push(next_opcode);
+                    opcodes_vector.push(another_opcode);
+                    return binloc + 1 as u16;
+                }
+            }
+            let another_opcode: OperationalCode = OperationalCode::new( bindings::eOpcodes_opcode_zero_flag + binloc, binloc + 1 as u16);
+            opcodes_vector.push(another_opcode);
+            return binloc ;
+        }, // BGT zero flag not set and carry flag set
+        _ => {
+            let another_opcode: OperationalCode = OperationalCode::new( binloc, binloc + 1 as u16);
+            opcodes_vector.push(another_opcode);
+            return binloc;
+        },
     }
+
+}
+
+fn def_label(elem: String, binloc: u16 ) -> Label
+{
+    let rx = Regex::new(r"([[:word:]]+):.*?").unwrap(); // strip the : from the end.
+    let matched_string = &rx.captures(&elem).unwrap()[1];
+    let new_label: Label = Label::new(matched_string.to_string(), binloc);
+    return new_label;
+}
+
+fn lcaseit(lex: &mut Lexer<Token>) -> String
+{
+    let slice = lex.slice();
+    let my_string:String = slice[..slice.len()].to_string();
+    return my_string.to_lowercase();
 }
 
 
@@ -171,7 +337,7 @@ enum Token {
     #[regex("([[:word:]]+):",lcaseit,  ignore(ascii_case) )]
     LABEL(String),
 
-    #[regex("(=[[:word:]]+)",lcaseit,  ignore(ascii_case) )]
+    #[regex("=([[:word:]]+)",lcaseit,  ignore(ascii_case) )]
     MEMORYALIAS(String),
 
     #[token("r1", ignore(ascii_case))]
@@ -234,10 +400,4 @@ enum Token {
     Error,
 }
 
-fn lcaseit(lex: &mut Lexer<Token>) -> String
-{
-    let slice = lex.slice();
-    let my_string:String = slice[..slice.len()].to_string();
-    return my_string.to_lowercase();
-}
 
