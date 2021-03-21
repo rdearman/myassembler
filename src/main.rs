@@ -15,6 +15,8 @@ extern crate regex;
 use regex::Regex;
 use instruction::{Label, OperationalCode};
 use bindings::eOpcodes;
+extern crate byteorder;
+use byteorder::{WriteBytesExt, LittleEndian};
 
 fn main()
 {
@@ -153,19 +155,12 @@ fn main()
 
 for i in opcodes_vector.iter_mut()
 {
-    println!("ADDR: {:#018b}", i.get_address_location());
-    println!("DATA: {:#018b}", i.get_memory_location());
+    bfile.write_u16::<LittleEndian>(i.get_memory_location());
 }
-    /*   Block for writing out buffer 
-
-    opcodes_vector.push( bindings::eOpcodes_opcode_nop);
-    opcodes_vector.push( bindings::eOpcodes_opcode_mov_r2_r4);
-    opcodes_vector.push( bindings::eOpcodes_opcode_mov_sp_r4);
-    opcodes_vector.push( bindings::eOpcodes_opcode_mov_mr_r4);
-
-    let opcode_buffer: &[u16] = &opcodes_vector;
-
-    bfile.write_all(opcode_buffer).unwrap(); */
+    /*   Block for writing out buffer (old code)
+    let opcode_buffer: &[u16] = &opcodes_vector.memory_location;
+    bfile.write_all(opcode_buffer).unwrap();
+*/
 
 }
 
