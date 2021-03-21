@@ -14,7 +14,7 @@ use clap::{Arg, App, SubCommand};
 extern crate regex;
 use regex::Regex;
 use instruction::{Label, OperationalCode};
-
+use bindings::eOpcodes;
 
 fn main()
 {
@@ -52,6 +52,14 @@ fn main()
     let mut binloc =0; 
     for line in reader.lines()
     {
+        // First thing push the two instructions which ALWAYS come first.
+        let primary_microcode: OperationalCode = OperationalCode::new( binloc + bindings::eOpcodes_opcode_Timer_0, bindings::eOpcodes_opcode_fetch_instruction);
+        binloc += 1;
+        let secondary_microcode: OperationalCode = OperationalCode::new( binloc  + bindings::eOpcodes_opcode_Timer_1, bindings::eOpcodes_opcode_load_instruction);
+        binloc += 1;
+        opcodes_vector.push(primary_microcode);
+        opcodes_vector.push(secondary_microcode);
+        let timer_count = binloc;
         let tline = &line.unwrap();
         let lex = Token::lexer( tline );
         for elem in lex
@@ -64,39 +72,42 @@ fn main()
                 },
                 Token::BEQ(inner) =>
                 {
-                    def_branch(1, inner, binloc, &mut label_vector, &mut opcodes_vector) ;
+                    binloc = def_branch(1, inner, binloc, &mut label_vector, &mut opcodes_vector) ;
                 },
                 Token::BNE(inner)  =>
                 {
-                    def_branch(2, inner, binloc, &mut label_vector, &mut opcodes_vector) ;
+                    binloc = def_branch(2, inner, binloc, &mut label_vector, &mut opcodes_vector) ;
                 },
                  Token::BLT(inner) =>
                 {
-                    def_branch(3, inner, binloc, &mut label_vector, &mut opcodes_vector) ;
+                    binloc = def_branch(3, inner, binloc, &mut label_vector, &mut opcodes_vector) ;
                 },
                 Token::BGT(inner) =>
                 {
-                    def_branch(4, inner, binloc, &mut label_vector, &mut opcodes_vector) ;
+                    binloc = def_branch(4, inner, binloc, &mut label_vector, &mut opcodes_vector) ;
                 },
-
-                // Token::ADD(inner)  => println!("{:?}", inner),
-                // Token::SUB(inner) => println!("{:?}", inner),
-                // Token::AND(inner) => println!("{:?}", inner),
-                // Token::ORR(inner) => println!("{:?}", inner),
-                // Token::XOR(inner)  => println!("{:?}", inner),
-                // Token::NOT(inner) => println!("{:?}", inner),
-                // Token::CMP(inner) => println!("{:?}", inner),
-                // Token::MOV(inner) => println!("{:?}", inner),
-                // Token::LDR(inner)  => println!("{:?}", inner),
-                // Token::STR(inner) => println!("{:?}", inner),
-                // Token::SHR(inner) => println!("{:?}", inner),
-                // Token::SHL(inner) => println!("{:?}", inner),
-                // Token::INC(inner)  => println!("{:?}", inner),
-                // Token::DEC(inner) => println!("{:?}", inner),
-                // Token::CCF => println!("{:?}", elem),
-                // Token::MEMORYALIAS(inner) => println!("{:?}", inner),
-                // Token::PUSH(inner) => println!("{:?}", inner),
-                // Token::POP(inner)  => println!("{:?}", inner),
+                Token::SHR(inner) =>                 {
+                    binloc = def_shift(0, inner, binloc, &mut opcodes_vector) ;
+                },
+                Token::SHL(inner) =>                 {
+                    binloc = def_shift(1, inner, binloc, &mut opcodes_vector) ;
+                },
+                Token::ADD(inner)  => println!("{:?}", inner),
+                Token::SUB(inner) => println!("{:?}", inner),
+                Token::AND(inner) => println!("{:?}", inner),
+                Token::ORR(inner) => println!("{:?}", inner),
+                Token::XOR(inner)  => println!("{:?}", inner),
+                Token::NOT(inner) => println!("{:?}", inner),
+                Token::CMP(inner) => println!("{:?}", inner),
+                Token::MOV(inner) => println!("{:?}", inner),
+                Token::LDR(inner)  => println!("{:?}", inner),
+                Token::STR(inner) => println!("{:?}", inner),
+                Token::INC(inner)  => println!("{:?}", inner),
+                Token::DEC(inner) => println!("{:?}", inner),
+                Token::CCF => println!("{:?}", elem),
+                Token::MEMORYALIAS(inner) => println!("{:?}", inner),
+                Token::PUSH(inner) => println!("{:?}", inner),
+                Token::POP(inner)  => println!("{:?}", inner),
                 Token::LABEL(inner)  => { 
                     label_vector.push(def_label(inner, binloc));
                     binloc += 1;
@@ -104,10 +115,47 @@ fn main()
                 _  => (),
             }
         }
-        // binloc += 1;
+        match timer_count
+        {
+            1 => {
+                let terary_microcode: OperationalCode = OperationalCode::new( binloc + bindings::eOpcodes_opcode_Timer_2, bindings::eOpcodes_opcode_reset_instr_timer);
+                binloc += 1;
+                opcodes_vector.push(terary_microcode);
+            },
+            2 => {
+                let terary_microcode: OperationalCode = OperationalCode::new( binloc + bindings::eOpcodes_opcode_Timer_3, bindings::eOpcodes_opcode_reset_instr_timer);
+                binloc += 1;
+                opcodes_vector.push(terary_microcode);
+            },
+            3 => {
+                let terary_microcode: OperationalCode = OperationalCode::new( binloc + bindings::eOpcodes_opcode_Timer_4, bindings::eOpcodes_opcode_reset_instr_timer);
+                binloc += 1;
+                opcodes_vector.push(terary_microcode);
+            },
+            4 => {
+                let terary_microcode: OperationalCode = OperationalCode::new( binloc + bindings::eOpcodes_opcode_Timer_5, bindings::eOpcodes_opcode_reset_instr_timer);
+                binloc += 1;
+                opcodes_vector.push(terary_microcode);
+            },
+            5 => {
+                let terary_microcode: OperationalCode = OperationalCode::new( binloc + bindings::eOpcodes_opcode_Timer_6, bindings::eOpcodes_opcode_reset_instr_timer);
+                binloc += 1;
+                opcodes_vector.push(terary_microcode);
+            },
+            _ => {
+                let terary_microcode: OperationalCode = OperationalCode::new( binloc + bindings::eOpcodes_opcode_Timer_7, bindings::eOpcodes_opcode_reset_instr_timer);
+                binloc += 1;
+                opcodes_vector.push(terary_microcode);
+            },
+        }
+
     }
 
-
+for i in opcodes_vector.iter_mut()
+{
+    println!("ADDR: {:#018b}", i.get_address_location());
+    println!("DATA: {:#018b}", i.get_memory_location());
+}
     /*   Block for writing out buffer 
 
     opcodes_vector.push( bindings::eOpcodes_opcode_nop);
@@ -121,15 +169,85 @@ fn main()
 
 }
 
+fn def_shift( instruction: i32, elem: String, binloc: u16, opcodes_vector: &mut Vec::<OperationalCode>) -> u16
+{
+    match instruction
+    {
+        0 => {
+            println!("SHR ELEM: {:?}", elem );
+            let rx = Regex::new(r".*[[:space:]]([[:word:]]+)").unwrap();
+            let matched_string = &rx.captures(&elem).unwrap()[1];
+            match matched_string
+            {
+                "r1" => {
+                    println!("SHR R1: {:?}", matched_string );
+                    let another_opcode: OperationalCode = OperationalCode::new( binloc  + bindings::eOpcodes_opcode_Timer_2, bindings::eOpcodes_opcode_shr_r1);
+                    opcodes_vector.push(another_opcode);
+                    return binloc + 1 as u16;
+                },
+                "r2" => {
+                    println!("SHR R2: {:?}", matched_string );
+                    let another_opcode: OperationalCode = OperationalCode::new( binloc + bindings::eOpcodes_opcode_Timer_2, bindings::eOpcodes_opcode_shr_r2);
+                    opcodes_vector.push(another_opcode);
+                    return binloc + 1 as u16;
+                },
+                "r3" => {
+                    println!("SHR R3: {:?}", matched_string );
+                    let another_opcode: OperationalCode = OperationalCode::new( binloc + bindings::eOpcodes_opcode_Timer_2, bindings::eOpcodes_opcode_shr_r3);
+                    opcodes_vector.push(another_opcode);
+                    return binloc + 1 as u16;
+                },
+                "r4" => {
+                    println!("SHR R4: {:?}", matched_string );
+                    let another_opcode: OperationalCode = OperationalCode::new( binloc + bindings::eOpcodes_opcode_Timer_2, bindings::eOpcodes_opcode_shr_r4);
+                    opcodes_vector.push(another_opcode);
+                    return binloc + 1 as u16;
+                },
+                _ => { println!("SHIFT ERROR"); return binloc as u16; },
+            }
+
+        }, // 0 = SHR
+        1 => { 
+            println!("SHL ELEM: {:?}", elem );
+            let rx = Regex::new(r".*[[:space:]]([[:word:]]+)").unwrap();
+            let matched_string = &rx.captures(&elem).unwrap()[1];
+            match matched_string
+            {
+                "r1" => {
+                    println!("SHL R1: {:?}", matched_string );
+                    let another_opcode: OperationalCode = OperationalCode::new( binloc + bindings::eOpcodes_opcode_Timer_2, bindings::eOpcodes_opcode_shl_r1);
+                    opcodes_vector.push(another_opcode);
+                    return binloc + 1 as u16;
+                },
+                "r2" => {
+                    println!("SHL R2: {:?}", matched_string );
+                    let another_opcode: OperationalCode = OperationalCode::new( binloc + bindings::eOpcodes_opcode_Timer_2, bindings::eOpcodes_opcode_shl_r2);
+                    opcodes_vector.push(another_opcode);
+                    return binloc + 1 as u16;
+                },
+                "r3" => {
+                    println!("SHL R3: {:?}", matched_string );
+                    let another_opcode: OperationalCode = OperationalCode::new( binloc + bindings::eOpcodes_opcode_Timer_2, bindings::eOpcodes_opcode_shl_r3);
+                    opcodes_vector.push(another_opcode);
+                    return binloc + 1 as u16;
+                },
+                "r4" => {
+                    println!("SHR RL: {:?}", matched_string );
+                    let another_opcode: OperationalCode = OperationalCode::new( binloc + bindings::eOpcodes_opcode_Timer_2, bindings::eOpcodes_opcode_shl_r4);
+                    opcodes_vector.push(another_opcode);
+                    return binloc + 1 as u16;
+                },
+                _ => { println!("SHIFT ERROR"); return binloc as u16; },
+            }
+        }, // 1 = SHL
+        _ => {
+            return binloc;
+        },
+    }
+}
 
 fn def_branch(instruction: i32, elem: String, binloc: u16, label_list: &mut Vec<Label>, opcodes_vector: &mut Vec::<OperationalCode>) -> u16
 {
-    // let mut branch_opcode: OperationalCode = OperationalCode::new(bindings::eOpcodes_opcode_zero_flag + binloc, binloc);
-    // let mut no_branch_opcode: OperationalCode = OperationalCode::new(binloc, binloc);
-
-    // opcodes_vector.push(bindings::OperationalCode::new((binloc), bindings::eOpcodes_opcode_fetch_instruction);
-    //opcodes_vector.push(bindings::eOpcodes_opcode_load_instruction);
-
     match instruction
     {
         0 => {
@@ -143,12 +261,12 @@ fn def_branch(instruction: i32, elem: String, binloc: u16, label_list: &mut Vec<
                 if item.get_name() == matched_string
                 {
                     // println!("MATCHED LABEL!");
-                    let next_opcode: OperationalCode = OperationalCode::new(binloc, item.get_location());
+                    let next_opcode: OperationalCode = OperationalCode::new(binloc + bindings::eOpcodes_opcode_Timer_2, item.get_location());
                     opcodes_vector.push(next_opcode);
                     return binloc + 1 as u16;
                 }
             }
-            let another_opcode: OperationalCode = OperationalCode::new( binloc, binloc + 1 as u16);
+            let another_opcode: OperationalCode = OperationalCode::new( binloc + bindings::eOpcodes_opcode_Timer_2, binloc + 1 as u16);
             opcodes_vector.push(another_opcode);
             return binloc;
         }, // BL
@@ -163,14 +281,14 @@ fn def_branch(instruction: i32, elem: String, binloc: u16, label_list: &mut Vec<
                 if item.get_name() == matched_string
                 {
                     //println!("MATCHED LABEL!");
-                    let next_opcode: OperationalCode = OperationalCode::new(bindings::eOpcodes_opcode_zero_flag + binloc, item.get_location());
-                    let another_opcode: OperationalCode = OperationalCode::new( binloc, binloc + 1 as u16);
+                    let next_opcode: OperationalCode = OperationalCode::new(bindings::eOpcodes_opcode_zero_flag + binloc + bindings::eOpcodes_opcode_Timer_2, item.get_location());
+                    let another_opcode: OperationalCode = OperationalCode::new( binloc + bindings::eOpcodes_opcode_Timer_2, binloc + 1 as u16);
                     opcodes_vector.push(next_opcode);
                     opcodes_vector.push(another_opcode);
                     return binloc + 1 as u16;
                 }
             }
-            let another_opcode: OperationalCode = OperationalCode::new( binloc, binloc + 1 as u16);
+            let another_opcode: OperationalCode = OperationalCode::new( binloc + bindings::eOpcodes_opcode_Timer_2, binloc + 1  as u16);
             opcodes_vector.push(another_opcode);
             return binloc ;
         }, // BEQ zero flag set
@@ -185,14 +303,14 @@ fn def_branch(instruction: i32, elem: String, binloc: u16, label_list: &mut Vec<
                 if item.get_name() == matched_string
                 {
                     //println!("MATCHED LABEL!");
-                    let next_opcode: OperationalCode = OperationalCode::new(binloc, item.get_location());
-                    let another_opcode: OperationalCode = OperationalCode::new( bindings::eOpcodes_opcode_zero_flag + binloc, binloc + 1 as u16);
+                    let next_opcode: OperationalCode = OperationalCode::new(binloc + bindings::eOpcodes_opcode_Timer_2, item.get_location());
+                    let another_opcode: OperationalCode = OperationalCode::new( bindings::eOpcodes_opcode_zero_flag + binloc + bindings::eOpcodes_opcode_Timer_2, binloc + 1 as u16);
                     opcodes_vector.push(next_opcode);
                     opcodes_vector.push(another_opcode);
                     return binloc + 1 as u16;
                 }
             }
-            let another_opcode: OperationalCode = OperationalCode::new( binloc, binloc + 1 as u16);
+            let another_opcode: OperationalCode = OperationalCode::new( binloc + bindings::eOpcodes_opcode_Timer_2, binloc + 1 as u16);
             opcodes_vector.push(another_opcode);
             return binloc ;
         }, // BNE Zflag not set
@@ -207,14 +325,14 @@ fn def_branch(instruction: i32, elem: String, binloc: u16, label_list: &mut Vec<
                 if item.get_name() == matched_string
                 {
                     //println!("MATCHED LABEL!");
-                    let next_opcode: OperationalCode = OperationalCode::new(bindings::eOpcodes_opcode_zero_flag + binloc, item.get_location());
-                    let another_opcode: OperationalCode = OperationalCode::new( bindings::eOpcodes_opcode_carryout_flag + binloc, binloc + 1 as u16);
+                    let next_opcode: OperationalCode = OperationalCode::new(bindings::eOpcodes_opcode_zero_flag + binloc + bindings::eOpcodes_opcode_Timer_2, item.get_location());
+                    let another_opcode: OperationalCode = OperationalCode::new( bindings::eOpcodes_opcode_carryout_flag + binloc + bindings::eOpcodes_opcode_Timer_2, binloc + 1 as u16);
                     opcodes_vector.push(next_opcode);
                     opcodes_vector.push(another_opcode);
                     return binloc + 1 as u16;
                 }
             }
-            let another_opcode: OperationalCode = OperationalCode::new( bindings::eOpcodes_opcode_carryout_flag + binloc, binloc + 1 as u16);
+            let another_opcode: OperationalCode = OperationalCode::new( bindings::eOpcodes_opcode_carryout_flag + binloc + bindings::eOpcodes_opcode_Timer_2, binloc + 1 as u16);
             opcodes_vector.push(another_opcode);
             return binloc ;
         }, // BLT zero flag set and carry flag not
@@ -229,19 +347,19 @@ fn def_branch(instruction: i32, elem: String, binloc: u16, label_list: &mut Vec<
                 if item.get_name() == matched_string
                 {
                     //println!("MATCHED LABEL!");
-                    let next_opcode: OperationalCode = OperationalCode::new( bindings::eOpcodes_opcode_carryout_flag + binloc, item.get_location());
-                    let another_opcode: OperationalCode = OperationalCode::new( bindings::eOpcodes_opcode_zero_flag + binloc, binloc + 1 as u16);
+                    let next_opcode: OperationalCode = OperationalCode::new( bindings::eOpcodes_opcode_carryout_flag + binloc + bindings::eOpcodes_opcode_Timer_2, item.get_location());
+                    let another_opcode: OperationalCode = OperationalCode::new( bindings::eOpcodes_opcode_zero_flag + binloc + bindings::eOpcodes_opcode_Timer_2, binloc + 1 as u16);
                     opcodes_vector.push(next_opcode);
                     opcodes_vector.push(another_opcode);
                     return binloc + 1 as u16;
                 }
             }
-            let another_opcode: OperationalCode = OperationalCode::new( bindings::eOpcodes_opcode_zero_flag + binloc, binloc + 1 as u16);
+            let another_opcode: OperationalCode = OperationalCode::new( bindings::eOpcodes_opcode_zero_flag + binloc + bindings::eOpcodes_opcode_Timer_2, binloc + 1 as u16);
             opcodes_vector.push(another_opcode);
             return binloc ;
         }, // BGT zero flag not set and carry flag set
         _ => {
-            let another_opcode: OperationalCode = OperationalCode::new( binloc, binloc + 1 as u16);
+            let another_opcode: OperationalCode = OperationalCode::new( binloc + bindings::eOpcodes_opcode_Timer_2, binloc + 1 as u16);
             opcodes_vector.push(another_opcode);
             return binloc;
         },
