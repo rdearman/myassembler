@@ -1,14 +1,12 @@
-/*
- A very simple program I can use to sanity check the machine code being generated.
- I can manually generate the correct machine code and validate the rust program
-*/
-
-
 start:
 	shr r1
+	bne bottom
+
+next:
 	shl r2
-	bl loop
-	// create a label further down in the program.
-loop:
+	shl r3
+	shl r4
 	bl start
-	
+
+bottom:
+	bl start

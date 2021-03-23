@@ -1,5 +1,5 @@
 [] create functions for all instructions
-[] make small asm program which will test all instructions (Working program not a list of instructions)
+[] Do multiple passes? Need to define memory addresses for labels and data first. 
 [] support labels further down in file (may need 2 step lex, first for labels and data)
 [] support the _data label. the underscore indicated variable name.
 [] way to separate program memory from storage memor (probably hardware not software)
@@ -11,3 +11,4 @@
     load PC into MAR
     load MDR into IR
 [X] define all descreet bytecodes for use in instructions. (bindgen)
+[X] make small asm program which can be used to match simple machine code (Working program not a list of instructions)
