@@ -1,12 +1,5 @@
-start:
-	shr r1
-	bne bottom
-
-next:
-	shl r2
-	shl r3
-	shl r4
-	bl start
-
-bottom:
-	bl start
+	mov r1 R2
+	mov R3 R4
+	mov r1 #25
+mov r2 #-25
+	mov r3 #0xFF
