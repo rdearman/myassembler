@@ -1,6 +1,9 @@
 #![allow(non_snake_case)]
 #![allow(unused_imports)]
 #[allow(dead_code)]
+#[allow(unused_must_use)]
+
+
 pub mod bindings;
 pub mod instruction;
 pub mod lexer;
@@ -237,16 +240,13 @@ fn main() {
     for x in 0..0xffff {
         for i in opcodes_vector.iter_mut() {
             if i.get_memory_location() == x {
-                bfile.write_u16::<LittleEndian>(i.get_memory_location());
+                let _unused = bfile.write_u16::<LittleEndian>(i.get_memory_location());
             } else {
-                bfile.write_u16::<LittleEndian>(0);
+                let _unused = bfile.write_u16::<LittleEndian>(0);
             }
         }
     }
 
-    // for i in opcodes_vector.iter_mut() {
-    //     bfile.write_u16::<LittleEndian>(i.get_memory_location());
-    // }
 }
 
 pub fn lcaseit(lex: &mut Lexer<Token>) -> String {
