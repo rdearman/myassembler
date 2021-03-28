@@ -12,7 +12,6 @@ pub const eOpcodes_opcode_mov_r2_Const1: eOpcodes = 4;
 pub const eOpcodes_opcode_mov_r3_Const1: eOpcodes = 5;
 pub const eOpcodes_opcode_mov_r4_Const1: eOpcodes = 6;
 pub const eOpcodes_opcode_mov_r1_r2: eOpcodes = 7;
-pub const eOpcodes_opcode_mov_r1_r3: eOpcodes = 8;
 pub const eOpcodes_opcode_mov_r1_r4: eOpcodes = 9;
 pub const eOpcodes_opcode_mov_r2_r1: eOpcodes = 10;
 pub const eOpcodes_opcode_mov_r2_r3: eOpcodes = 11;
@@ -141,7 +140,6 @@ pub const eOpcodes_opcode_assert_r3_dbus: eOpcodes = 133;
 pub const eOpcodes_opcode_assert_r4_dbus: eOpcodes = 134;
 pub const eOpcodes_opcode_asset_adder: eOpcodes = 135;
 
-
 pub const eOpcodes_opcode_zero_flag: eOpcodes = 256;
 pub const eOpcodes_opcode_overflow_flag: eOpcodes = 512;
 pub const eOpcodes_opcode_carryin_flag: eOpcodes = 768;
@@ -155,5 +153,4 @@ pub const eOpcodes_opcode_Timer_5: eOpcodes = 24576;
 pub const eOpcodes_opcode_Timer_6: eOpcodes = 28672;
 pub const eOpcodes_opcode_Timer_7: eOpcodes = 32768;
 
-
-pub type eOpcodes = ::std::os::raw::c_ushort ; // u16
+pub type eOpcodes = ::std::os::raw::c_ushort; // u16

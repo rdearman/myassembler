@@ -8,62 +8,95 @@
 #![allow(unused_variables)]
 
 use crate::bindings::eOpcodes;
-use crate::my_operation::{Label, OperationalCode,Unresolved};
+use crate::my_operation::{Label, OperationalCode, Unresolved};
 use regex::Regex;
 
-pub fn def_mov(
-    elem: String,
-    binloc: u16,
-    opcodes_vector: &mut Vec<OperationalCode>,
-) -> u16 {
-    println!("MOV ELEM: {:?}", elem);
+pub fn def_mov(elem: String, mut binloc: u16, opcodes_vector: &mut Vec<OperationalCode>) -> u16 
+{
+    // println!("ORIGINAL STRING: {:?}", elem);
     let rx = Regex::new(r".*[[:space:]]([[:word:]]+)").unwrap();
+    let rxdigit = Regex::new(r".*[[:space:]]#(-?[[:digit:]]+)").unwrap();
     let matched_string = &rx.captures(&elem).unwrap()[1];
-    match matched_string {
-        "r1" => {
-            println!("SHR R1: {:?}", matched_string);
-            let another_opcode: OperationalCode = OperationalCode::new(
-                binloc + crate::bindings::eOpcodes_opcode_Timer_2,
-                crate::bindings::eOpcodes_opcode_shr_r1,
-            );
-            opcodes_vector.push(another_opcode);
-            return binloc + 1 as u16;
-        }
-        "r2" => {
-            println!("SHR R2: {:?}", matched_string);
-            let another_opcode: OperationalCode = OperationalCode::new(
-                binloc + crate::bindings::eOpcodes_opcode_Timer_2,
-                crate::bindings::eOpcodes_opcode_shr_r2,
-            );
-            opcodes_vector.push(another_opcode);
-            return binloc + 1 as u16;
-        }
-        "r3" => {
-            println!("SHR R3: {:?}", matched_string);
-            let another_opcode: OperationalCode = OperationalCode::new(
-                binloc + crate::bindings::eOpcodes_opcode_Timer_2,
-                crate::bindings::eOpcodes_opcode_shr_r3,
-            );
-            opcodes_vector.push(another_opcode);
-            return binloc + 1 as u16;
-        }
-        "r4" => {
-            println!("SHR R4: {:?}", matched_string);
-            let another_opcode: OperationalCode = OperationalCode::new(
-                binloc + crate::bindings::eOpcodes_opcode_Timer_2,
-                crate::bindings::eOpcodes_opcode_shr_r4,
-            );
-            opcodes_vector.push(another_opcode);
-            return binloc + 1 as u16;
+    //let second_matched_string = &rx.captures(&elem).unwrap()[2];
+    let immediate_count = &rxdigit.captures_iter(&elem).count();
+    let mut use_immediate_value: bool = false;
+    let mut rxdigitvalue: i32 = 0;
+
+    match immediate_count {
+        1 => {
+            rxdigitvalue = rxdigit.captures(&elem).unwrap()[1].parse::<i32>().unwrap_or_default();
+            if rxdigitvalue > 255 {
+                panic!("Immediate value greater than 255 at: {:?}", elem);
+            }
+            use_immediate_value = true;
         }
         _ => {
-            println!("Immediate Value? : {:?}", matched_string);
-            return binloc as u16;
+           println!("immediate_count: {:?} ",immediate_count);
         }
+    }
+
+    match use_immediate_value
+    {
+        true => {
+            // Then matched string is the register to move immediate into it.
+            println!("immediate = {:?} ",rxdigitvalue);
+            match matched_string {
+                "r1" => {
+                    if use_immediate_value {
+                        let another_opcode: OperationalCode = OperationalCode::new(
+                            binloc + crate::bindings::eOpcodes_opcode_Timer_2,
+                            crate::bindings::eOpcodes_opcode_mov_r1_Const1,
+                        );
+                        opcodes_vector.push(another_opcode);
+                        binloc += 1 as u16;
+                        let next_opcode: OperationalCode = OperationalCode::new(
+                            binloc + crate::bindings::eOpcodes_opcode_Timer_3,
+                            crate::bindings::eOpcodes_opcode_mov_r1_Const1,
+                        );
+                        opcodes_vector.push(next_opcode);
+                        return binloc + 1 as u16;
+                    } else {
+                        return binloc + 1 as u16;
+                    }
+                }
+                "r2" => {
+                    return binloc + 1 as u16;
+                }
+                "r3" => {
+                    return binloc + 1 as u16;
+                }
+                "r4" => {
+                    return binloc + 1 as u16;
+                }
+                _ => {
+                    panic!("Error with statement: {:?}", elem);
+                }
+            }
+        },
+        false => {
+            // Then it has matched the second register, and we need to get the first register
+            match matched_string {
+                "r1" => {
+                    return binloc + 1 as u16;
+                }
+                "r2" => {
+                    return binloc + 1 as u16;
+                }
+                "r3" => {
+                    return binloc + 1 as u16;
+                }
+                "r4" => {
+                    return binloc + 1 as u16;
+                }
+                _ => {
+                    panic!("Error with statement: {:?}", elem);
+                }
+            }
+        },
     }
 }
 
-//////////////////////////
+    //////////////////////////
 pub fn def_shift(
     instruction: i32,
     elem: String,
@@ -200,7 +233,7 @@ pub fn def_branch(
                 binloc + 1 as u16,
             );
             opcodes_vector.push(another_opcode);
-            unresolved_vector.push( Unresolved::new(0, 2, elem.to_string(), binloc));
+            unresolved_vector.push(Unresolved::new(0, 2, elem.to_string(), binloc));
             return binloc;
         } // BL
         1 => {
@@ -233,11 +266,11 @@ pub fn def_branch(
                 binloc + 1 as u16,
             );
             opcodes_vector.push(another_opcode);
-            unresolved_vector.push( Unresolved::new(0, 2, elem.to_string(), binloc));
+            unresolved_vector.push(Unresolved::new(0, 2, elem.to_string(), binloc));
             return binloc;
         } // BEQ zero flag set
         2 => {
-            println!("INSIDE BNE: {:?}", elem );
+            println!("INSIDE BNE: {:?}", elem);
             let rx = Regex::new(r".*[[:space:]]([[:word:]]+)").unwrap();
             let matched_string = &rx.captures(&elem).unwrap()[1];
             for item in label_list.iter_mut() {
@@ -265,7 +298,7 @@ pub fn def_branch(
                 255 + 1 as u16,
             );
             opcodes_vector.push(another_opcode);
-            unresolved_vector.push( Unresolved::new(0, 2, elem.to_string(), binloc));
+            unresolved_vector.push(Unresolved::new(0, 2, elem.to_string(), binloc));
             return binloc;
         } // BNE Zflag not set
         3 => {
@@ -302,7 +335,7 @@ pub fn def_branch(
                 binloc + 1 as u16,
             );
             opcodes_vector.push(another_opcode);
-            unresolved_vector.push( Unresolved::new(0, 2, elem.to_string(), binloc));
+            unresolved_vector.push(Unresolved::new(0, 2, elem.to_string(), binloc));
             return binloc;
         } // BLT zero flag set and carry flag not
         4 => {
@@ -332,11 +365,13 @@ pub fn def_branch(
             }
             label_list.push(Label::new(matched_string.to_string(), 256 as u16));
             let another_opcode: OperationalCode = OperationalCode::new(
-                crate::bindings::eOpcodes_opcode_zero_flag + binloc + crate::bindings::eOpcodes_opcode_Timer_2,
+                crate::bindings::eOpcodes_opcode_zero_flag
+                    + binloc
+                    + crate::bindings::eOpcodes_opcode_Timer_2,
                 binloc + 1 as u16,
             );
             opcodes_vector.push(another_opcode);
-            unresolved_vector.push( Unresolved::new(0, 2, elem.to_string(), binloc));
+            unresolved_vector.push(Unresolved::new(0, 2, elem.to_string(), binloc));
             return binloc;
         } // BGT zero flag not set and carry flag set
         _ => {
@@ -350,7 +385,7 @@ pub fn def_branch(
     }
 }
 
-pub fn def_label(elem: String, binloc: u16, label_list: &mut Vec<Label>)  {
+pub fn def_label(elem: String, binloc: u16, label_list: &mut Vec<Label>) {
     let rx = Regex::new(r"([[:word:]]+):.*?").unwrap(); // strip the : from the end.
     let matched_string = &rx.captures(&elem).unwrap()[1];
     for item in label_list.iter_mut() {

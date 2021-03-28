@@ -2,9 +2,9 @@
 #![allow(unused_imports)]
 #[allow(dead_code)]
 pub mod bindings;
-pub mod my_operation;
 pub mod instruction;
 pub mod lexer;
+pub mod my_operation;
 use logos::{Lexer, Logos};
 use std::fs::File;
 use std::io::Write;
@@ -13,8 +13,8 @@ extern crate clap;
 use clap::{App, Arg, SubCommand};
 extern crate regex;
 use bindings::eOpcodes;
-use my_operation::{Label, OperationalCode,Unresolved};
-use instruction::{def_branch, def_label, def_shift, def_mov};
+use instruction::{def_branch, def_label, def_mov, def_shift};
+use my_operation::{Label, OperationalCode, Unresolved};
 use regex::Regex;
 extern crate byteorder;
 use byteorder::{LittleEndian, WriteBytesExt};
@@ -52,12 +52,11 @@ fn main() {
     let first_pass = BufReader::new(file);
     let mut opcodes_vector: Vec<OperationalCode> = vec![];
     let mut label_vector = vec![];
-    let mut unresolved_vector: Vec<Unresolved>  = vec![];
+    let mut unresolved_vector: Vec<Unresolved> = vec![];
 
     // Read the file line by line using the lines() iterator from std::io::BufRead.
     let mut binloc = 0;
     for line in first_pass.lines() {
-
         let tline = &line.unwrap();
         let lex2 = Token::lexer(tline);
         for elem in lex2 {
@@ -78,19 +77,54 @@ fn main() {
 
             match elem {
                 Token::BL(inner) => {
-                    binloc = def_branch(0, inner, binloc, &mut label_vector, &mut unresolved_vector, &mut opcodes_vector);
+                    binloc = def_branch(
+                        0,
+                        inner,
+                        binloc,
+                        &mut label_vector,
+                        &mut unresolved_vector,
+                        &mut opcodes_vector,
+                    );
                 }
                 Token::BEQ(inner) => {
-                    binloc = def_branch(1, inner, binloc, &mut label_vector, &mut unresolved_vector, &mut opcodes_vector);
+                    binloc = def_branch(
+                        1,
+                        inner,
+                        binloc,
+                        &mut label_vector,
+                        &mut unresolved_vector,
+                        &mut opcodes_vector,
+                    );
                 }
                 Token::BNE(inner) => {
-                    binloc = def_branch(2, inner, binloc, &mut label_vector, &mut unresolved_vector, &mut opcodes_vector);
+                    binloc = def_branch(
+                        2,
+                        inner,
+                        binloc,
+                        &mut label_vector,
+                        &mut unresolved_vector,
+                        &mut opcodes_vector,
+                    );
                 }
                 Token::BLT(inner) => {
-                    binloc = def_branch(3, inner, binloc, &mut label_vector, &mut unresolved_vector, &mut opcodes_vector);
+                    binloc = def_branch(
+                        3,
+                        inner,
+                        binloc,
+                        &mut label_vector,
+                        &mut unresolved_vector,
+                        &mut opcodes_vector,
+                    );
                 }
                 Token::BGT(inner) => {
-                    binloc = def_branch(4, inner, binloc, &mut label_vector, &mut unresolved_vector, &mut opcodes_vector);
+                    binloc = def_branch(
+                        4,
+                        inner,
+                        binloc,
+                        &mut label_vector,
+                        &mut unresolved_vector,
+                        &mut opcodes_vector,
+                    );
                 }
                 Token::SHR(inner) => {
                     binloc = def_shift(0, inner, binloc, &mut opcodes_vector);
@@ -106,9 +140,9 @@ fn main() {
                 Token::NOT(inner) => println!("{:?}", inner),
                 Token::CMP(inner) => println!("{:?}", inner),
                 Token::MOV(inner) => {
-                    println!("{:?}", inner);
+                    //println!("{:?}", inner);
                     binloc = def_mov(inner, binloc, &mut opcodes_vector);
-                },
+                }
                 Token::LDR(inner) => println!("{:?}", inner),
                 Token::STR(inner) => println!("{:?}", inner),
                 Token::INC(inner) => println!("{:?}", inner),
@@ -182,13 +216,12 @@ fn main() {
         }
     }
 
+    let mut dummy_vector = vec![];
 
-    let mut dummy_vector  = vec![];
-
-    for parse_problem in unresolved_vector.iter_mut() 
-    {
+    for parse_problem in unresolved_vector.iter_mut() {
         // go through unresoved issues and repair (now that you've passed through the entire file)
-        if parse_problem.get_resolution_type() == 0 // Label problem
+        if parse_problem.get_resolution_type() == 0
+        // Label problem
         {
             def_branch(
                 parse_problem.get_arg_integer(),
@@ -196,20 +229,16 @@ fn main() {
                 parse_problem.get_memory_location(),
                 &mut label_vector,
                 &mut dummy_vector,
-                &mut opcodes_vector);
+                &mut opcodes_vector,
+            );
         }
     }
 
-    for x in 0 .. 0xffff
-    {
-        for i in opcodes_vector.iter_mut()
-        {
-            if i.get_memory_location() == x
-            {
+    for x in 0..0xffff {
+        for i in opcodes_vector.iter_mut() {
+            if i.get_memory_location() == x {
                 bfile.write_u16::<LittleEndian>(i.get_memory_location());
-            }
-            else
-            {
+            } else {
                 bfile.write_u16::<LittleEndian>(0);
             }
         }
@@ -226,14 +255,20 @@ pub fn lcaseit(lex: &mut Lexer<Token>) -> String {
     return my_string.to_lowercase();
 }
 
-
 #[derive(Logos, Debug, PartialEq)]
 pub enum Token {
+    // Tokens can be literal strings, of any length.
+    #[regex("[;]+.*", logos::skip, priority = 1)]
+    #[regex("[[/]{2}].*", logos::skip, priority = 2)]
+    COMMENT,
+
+    #[regex(r"(?s)/\*.*\*/", logos::skip, priority = 1)]
+    MULTILINECOMMENT,
 
     #[regex(
-        "[[:space:]]*MOV[[:space:]]+[[:word:]]+[[:space:]]+[[:word:]]+",
+        "[[:space:]]+MOV[[:space:]]+([[:word:]])+[[:space:]]+#*(-?[[:word:]])+",
         lcaseit,
-        priority = 1,
+        priority = 2,
         ignore(ascii_case)
     )]
     MOV(String),
@@ -311,7 +346,7 @@ pub enum Token {
     STR(String),
 
     #[regex(
-        "[[:space:]]*SHR[[:space:]]+([[:word:]]+)",
+        "[[:space:]]+SHR[[:space:]]+([[:word:]]+)",
         lcaseit,
         priority = 1,
         ignore(ascii_case)
@@ -406,57 +441,6 @@ pub enum Token {
 
     #[regex("=([[:word:]]+)", lcaseit, ignore(ascii_case))]
     MEMORYALIAS(String),
-
-    #[token("r1", ignore(ascii_case))]
-    R1,
-
-    #[token("r2", ignore(ascii_case))]
-    R2,
-
-    #[token("r3", ignore(ascii_case))]
-    R3,
-
-    #[token("r4", ignore(ascii_case))]
-    R4,
-
-    #[token("ir", ignore(ascii_case))]
-    IR,
-
-    #[token("PC", ignore(ascii_case))]
-    PC,
-
-    #[token(".")]
-    Period,
-
-    #[token(",")]
-    COMMA,
-
-    #[token("[")]
-    SquareBracketOpen,
-
-    #[token("]")]
-    SquareBracketClose,
-
-    #[token("{")]
-    CurlyBracketOpen,
-
-    #[token("}")]
-    CurlyBracketClose,
-
-    #[regex("#([[:digit:]]+)")]
-    IMMEDIATE,
-
-    // Or regular expressions.
-    #[regex("[[:word:]]+", priority = 2)]
-    JMPLOC,
-
-    // Tokens can be literal strings, of any length.
-    #[regex("[;]+.*", logos::skip)]
-    #[regex("[[/]{2}.*]", logos::skip)]
-    COMMENT,
-
-    #[regex(r"(?s)/\*.*\*/", logos::skip)]
-    MULTILINECOMMENT,
 
     // Logos requires one token variant to handle errors,
     // it can be named anything you wish.

@@ -64,19 +64,14 @@ impl Unresolved {
     }
 }
 
-
 #[derive(PartialEq, Debug, Clone, Default)]
 pub struct OperationalCode {
     address_location: u16, // the address requested, e.g. from the PC
-    memory_location: u16, // the output, e.g. what do do for each timer. 
-    // the address location is always the 8-bit location from the PC with additional upper range 0-7 from the timer.bindings
+    memory_location: u16,  // the output, e.g. what do do for each timer.
+                           // the address location is always the 8-bit location from the PC with additional upper range 0-7 from the timer.bindings
 }
 impl OperationalCode {
-    pub fn new(
-        address_location: u16, 
-        memory_location: u16, 
-
-    ) -> Self {
+    pub fn new(address_location: u16, memory_location: u16) -> Self {
         OperationalCode {
             address_location: address_location,
             memory_location: memory_location,
@@ -106,11 +101,7 @@ pub struct Label {
 }
 
 impl Label {
-    pub fn new(
-        name: String,
-        location: u16,
-
-    ) -> Self {
+    pub fn new(name: String, location: u16) -> Self {
         Label {
             name: name.to_string(),
             location: location,
@@ -133,49 +124,16 @@ impl Label {
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #[derive(Debug)]
-pub struct Data 
-{
+pub struct Data {
     pub variable_name: String,
     pub memory_start_location: WordSize,
     pub memory_end_location: WordSize,
-    // pub data_type: dtype, // Is this .ascii or byte, etc. 
+    // pub data_type: dtype, // Is this .ascii or byte, etc.
 }
 
 #[derive(Debug)]
-pub struct Instruction
-{
+pub struct Instruction {
     pub opcode: [WordSize; 5],
     pub args: [WordSize; 6],
 }
