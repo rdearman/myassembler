@@ -12,6 +12,7 @@ pub const eOpcodes_opcode_mov_r2_Const1: eOpcodes = 4;
 pub const eOpcodes_opcode_mov_r3_Const1: eOpcodes = 5;
 pub const eOpcodes_opcode_mov_r4_Const1: eOpcodes = 6;
 pub const eOpcodes_opcode_mov_r1_r2: eOpcodes = 7;
+pub const eOpcodes_opcode_mov_r1_r3: eOpcodes = 8;
 pub const eOpcodes_opcode_mov_r1_r4: eOpcodes = 9;
 pub const eOpcodes_opcode_mov_r2_r1: eOpcodes = 10;
 pub const eOpcodes_opcode_mov_r2_r3: eOpcodes = 11;

@@ -6,7 +6,6 @@
 
 pub mod bindings;
 pub mod instruction;
-pub mod lexer;
 pub mod my_operation;
 use logos::{Lexer, Logos};
 use std::fs::File;

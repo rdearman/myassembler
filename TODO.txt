@@ -1,6 +1,14 @@
 [] create functions for all instructions
 [] support the _data label. the underscore indicated variable name.
 [] way to separate program memory from storage memor (probably hardware not software)
+[] Fix issue with opcodes in C program that loads bindings.rs (See Note)
+    // /////////// ===========================================  //////////////////
+    //  We have a problem here with the opcodes and need to adjust the C program 
+    //  that loads the EEProms. To move a constant you need to have:
+    //  Timer0/1 load and fetch
+    //  Timer 2 load MAR with address of next memory location,
+    //  Timer 3 assert MDR on to the databus and latch the register.
+    // /////////// ===========================================  //////////////////
 
 ============
 

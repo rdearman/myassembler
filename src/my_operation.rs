@@ -6,7 +6,7 @@
 #![allow(unused_imports)]
 #![allow(unused_mut)]
 #![allow(unused_variables)]
-#![allow(unused_must_use)]
+
 
 
 pub type WordSize = u16;
