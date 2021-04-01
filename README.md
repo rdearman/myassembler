@@ -6,7 +6,7 @@ I've designed the assembly language to be like GAS syntax, but it doesn't suppor
 
 The plan is to support the following:
 
-
+ <pre>
 /* ------------- My Assembler Language ----------------
 ADD reg reg | arg
 SUB reg reg | arg
@@ -35,3 +35,4 @@ label:
 
 _variable_name .asciz " +"
 _variable_name .byte 0
+ </pre>
