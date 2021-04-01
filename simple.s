@@ -1,16 +1,17 @@
-	mov r1 r2
-	mov r3 r4
-	mov r1 #253
-	mov r1 #254
-	mov r1 #255
-	mov r1 #170
-	mov r1 #171
-	mov r1 #172
+start:
+	mov r1 #55
+	mov r2 #2
+	mov r3 r1
+	sub r1 r2
+	add r2 r3
+	BEQ start
 
-	mov r2 #-120
-	mov r1 r4
-	mov r2 r3
-	mov r3 r2
-	mov r4 r1
-	mov r1 r2
-	mov r2 r3
+	shr r3
+	shl r1
+	add r1 r3
+	bne start
+
+	mov r3 r4
+	add r4 r1
+	add r4 r2
+	

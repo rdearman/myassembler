@@ -11,6 +11,728 @@ use crate::bindings::eOpcodes;
 use crate::my_operation::{Label, OperationalCode, Unresolved};
 use regex::Regex;
 
+// add, sub, mov are almost carbon copies and really should be moved into one unified function. 
+pub fn def_inc_dec(instr: i32, elem: String, mut binloc: u16, opcodes_vector: &mut Vec<OperationalCode>) -> u16 {
+    // println!("ORIGINAL STRING: {:?}", elem);
+    let rx = Regex::new(r".*[[:space:]]([[:word:]]+)").unwrap();
+    let matched_string = &rx.captures(&elem).unwrap()[1];
+
+    let another_opcode: OperationalCode = OperationalCode::new(
+        binloc + crate::bindings::eOpcodes_opcode_Timer_2,
+        crate::bindings::eOpcodes_opcode_load_mar + crate::bindings::eOpcodes_opcode_inc_pc,
+    );
+    opcodes_vector.push(another_opcode);
+    binloc += 1 as u16;
+
+    match instr {
+        0 => { // INC
+            match matched_string {
+                "r1" => {
+                    let next_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_3,
+                        crate::bindings::eOpcodes_opcode_inc_r1,
+                    );
+                    opcodes_vector.push(next_opcode);
+                    return binloc + 1 as u16;
+                }
+                "r2" => {
+                    let next_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_3,
+                        crate::bindings::eOpcodes_opcode_inc_r2,
+                    );
+                    opcodes_vector.push(next_opcode);
+                    return binloc + 1 as u16;
+                }
+                "r3" => {
+                    let next_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_3,
+                        crate::bindings::eOpcodes_opcode_inc_r3,
+                    );
+                    opcodes_vector.push(next_opcode);
+                    return binloc + 1 as u16;
+                }
+                "r4" => {
+                    let next_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_3,
+                        crate::bindings::eOpcodes_opcode_inc_r4,
+                    );
+                    opcodes_vector.push(next_opcode);
+                    return binloc + 1 as u16;
+                }
+                "pc" => {
+                    let next_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_3,
+                        crate::bindings::eOpcodes_opcode_inc_pc,
+                    );
+                    opcodes_vector.push(next_opcode);
+                    return binloc + 1 as u16;
+                }
+                "sp" => {
+                    let next_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_3,
+                        crate::bindings::eOpcodes_opcode_inc_sp,
+                    );
+                    opcodes_vector.push(next_opcode);
+                    return binloc + 1 as u16;
+                }
+                _ => {
+                    panic!("Error with statement: {:?}", elem);
+                }
+            }
+        },
+        1 => { // DEC
+            match matched_string {
+                "r1" => {
+                    let next_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_3,
+                        crate::bindings::eOpcodes_opcode_dec_r1,
+                    );
+                    opcodes_vector.push(next_opcode);
+                    return binloc + 1 as u16;
+                }
+                "r2" => {
+                    let next_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_3,
+                        crate::bindings::eOpcodes_opcode_dec_r2,
+                    );
+                    opcodes_vector.push(next_opcode);
+                    return binloc + 1 as u16;
+                }
+                "r3" => {
+                    let next_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_3,
+                        crate::bindings::eOpcodes_opcode_dec_r3,
+                    );
+                    opcodes_vector.push(next_opcode);
+                    return binloc + 1 as u16;
+                }
+                "r4" => {
+                    let next_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_3,
+                        crate::bindings::eOpcodes_opcode_dec_r4,
+                    );
+                    opcodes_vector.push(next_opcode);
+                    return binloc + 1 as u16;
+                }
+                "sp" => {
+                    let next_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_3,
+                        crate::bindings::eOpcodes_opcode_dec_sp,
+                    );
+                    opcodes_vector.push(next_opcode);
+                    return binloc + 1 as u16;
+                }
+                _ => {
+                    panic!("Error with statement: {:?}", elem);
+                }
+            }
+        },
+        _ => {
+            panic!("Error with statement: {:?}", elem);
+        }
+    }
+
+}
+
+pub fn def_logic(instr: i32, elem: String, mut binloc: u16, opcodes_vector: &mut Vec<OperationalCode>) -> u16 {
+    // println!("ORIGINAL STRING: {:?}", elem);
+    let rx = Regex::new(r".*[[:space:]]([[:word:]]+)").unwrap();
+    let matched_string = &rx.captures(&elem).unwrap()[1];
+
+    let another_opcode: OperationalCode = OperationalCode::new(
+        binloc + crate::bindings::eOpcodes_opcode_Timer_2,
+        crate::bindings::eOpcodes_opcode_load_mar + crate::bindings::eOpcodes_opcode_inc_pc,
+    );
+    opcodes_vector.push(another_opcode);
+    binloc += 1 as u16;
+
+    match instr {
+        0 => { // NOT
+            match matched_string {
+                "r1" => {
+                    let next_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_3,
+                        crate::bindings::eOpcodes_opcode_not_r1,
+                    );
+                    opcodes_vector.push(next_opcode);
+                    return binloc + 1 as u16;
+                }
+                "r2" => {
+                    let next_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_3,
+                        crate::bindings::eOpcodes_opcode_not_r2,
+                    );
+                    opcodes_vector.push(next_opcode);
+                    return binloc + 1 as u16;
+                }
+                "r3" => {
+                    let next_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_3,
+                        crate::bindings::eOpcodes_opcode_not_r3,
+                    );
+                    opcodes_vector.push(next_opcode);
+                    return binloc + 1 as u16;
+                }
+                "r4" => {
+                    let next_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_3,
+                        crate::bindings::eOpcodes_opcode_not_r4,
+                    );
+                    opcodes_vector.push(next_opcode);
+                    return binloc + 1 as u16;
+                }
+                _ => {
+                    panic!("Error with statement: {:?}", elem);
+                }
+            }
+        },
+        1 => { // XOR
+            match matched_string {
+                "r1" => {
+                    let next_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_3,
+                        crate::bindings::eOpcodes_opcode_xor_r1,
+                    );
+                    opcodes_vector.push(next_opcode);
+                    return binloc + 1 as u16;
+                }
+                "r2" => {
+                    let next_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_3,
+                        crate::bindings::eOpcodes_opcode_xor_r2,
+                    );
+                    opcodes_vector.push(next_opcode);
+                    return binloc + 1 as u16;
+                }
+                "r3" => {
+                    let next_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_3,
+                        crate::bindings::eOpcodes_opcode_xor_r3,
+                    );
+                    opcodes_vector.push(next_opcode);
+                    return binloc + 1 as u16;
+                }
+                "r4" => {
+                    let next_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_3,
+                        crate::bindings::eOpcodes_opcode_xor_r4,
+                    );
+                    opcodes_vector.push(next_opcode);
+                    return binloc + 1 as u16;
+                }
+                _ => {
+                    panic!("Error with statement: {:?}", elem);
+                }
+            }
+        },
+        2 => { // AND
+            match matched_string {
+                "r1" => {
+                    let next_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_3,
+                        crate::bindings::eOpcodes_opcode_and_r1,
+                    );
+                    opcodes_vector.push(next_opcode);
+                    return binloc + 1 as u16;
+                }
+                "r2" => {
+                    let next_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_3,
+                        crate::bindings::eOpcodes_opcode_and_r2,
+                    );
+                    opcodes_vector.push(next_opcode);
+                    return binloc + 1 as u16;
+                }
+                "r3" => {
+                    let next_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_3,
+                        crate::bindings::eOpcodes_opcode_and_r3,
+                    );
+                    opcodes_vector.push(next_opcode);
+                    return binloc + 1 as u16;
+                }
+                "r4" => {
+                    let next_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_3,
+                        crate::bindings::eOpcodes_opcode_and_r4,
+                    );
+                    opcodes_vector.push(next_opcode);
+                    return binloc + 1 as u16;
+                }
+                _ => {
+                    panic!("Error with statement: {:?}", elem);
+                }
+            }
+        },
+        3 => { // ORR
+            match matched_string {
+                "r1" => {
+                    let next_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_3,
+                        crate::bindings::eOpcodes_opcode_or_r1,
+                    );
+                    opcodes_vector.push(next_opcode);
+                    return binloc + 1 as u16;
+                }
+                "r2" => {
+                    let next_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_3,
+                        crate::bindings::eOpcodes_opcode_or_r2,
+                    );
+                    opcodes_vector.push(next_opcode);
+                    return binloc + 1 as u16;
+                }
+                "r3" => {
+                    let next_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_3,
+                        crate::bindings::eOpcodes_opcode_or_r3,
+                    );
+                    opcodes_vector.push(next_opcode);
+                    return binloc + 1 as u16;
+                }
+                "r4" => {
+                    let next_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_3,
+                        crate::bindings::eOpcodes_opcode_or_r4,
+                    );
+                    opcodes_vector.push(next_opcode);
+                    return binloc + 1 as u16;
+                }
+                _ => {
+                    panic!("Error with statement: {:?}", elem);
+                }
+            }
+
+        },
+        _ => {
+            panic!("Error with statement: {:?}", elem);
+        }
+    }
+
+}
+
+pub fn def_sub(elem: String, mut binloc: u16, opcodes_vector: &mut Vec<OperationalCode>) -> u16 {
+    // println!("ORIGINAL STRING: {:?}", elem);
+    let rx = Regex::new(r".*[[:space:]]([[:word:]]+)").unwrap();
+    let rxdigit = Regex::new(r".*[[:space:]]#(-?[[:digit:]]+)").unwrap();
+    let matched_string = &rx.captures(&elem).unwrap()[1];
+    //let second_matched_string = &rx.captures(&elem).unwrap()[2];
+    let immediate_count = &rxdigit.captures_iter(&elem).count();
+    let mut use_immediate_value: bool = false;
+    let mut rxdigitvalue: i32 = 0;
+
+    match immediate_count {
+        1 => {
+            rxdigitvalue = rxdigit.captures(&elem).unwrap()[1]
+                .parse::<i32>()
+                .unwrap_or_default();
+            if rxdigitvalue > 255 {
+                panic!("Immediate value greater than 255 at: {:?}", elem);
+            }
+            use_immediate_value = true;
+        }
+        _ => {
+            //println!("immediate_count: {:?} ", immediate_count);
+        }
+    }
+
+    /* Everything below is copied from the mov functions. Need to change the opcodes which it uses 
+        and some of the logic. 
+    */
+
+    match use_immediate_value {
+        true => {
+            let another_opcode: OperationalCode = OperationalCode::new(
+                binloc + crate::bindings::eOpcodes_opcode_Timer_2,
+                crate::bindings::eOpcodes_opcode_load_mar + crate::bindings::eOpcodes_opcode_inc_pc,
+            );
+            opcodes_vector.push(another_opcode);
+            binloc += 1 as u16;
+            let immediate_address: OperationalCode = OperationalCode::new(
+                binloc + 1 + crate::bindings::eOpcodes_opcode_Timer_3, rxdigitvalue as u16,
+            );
+            opcodes_vector.push(immediate_address);
+            binloc += 1 as u16;
+            match matched_string {
+                "r1" => {
+                    let next_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_4,
+                        crate::bindings::eOpcodes_opcode_sub_r1_Const1,
+                    );
+                    opcodes_vector.push(next_opcode);
+                    return binloc + 1 as u16;
+                }
+                "r2" => {
+                    let next_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_4,
+                        crate::bindings::eOpcodes_opcode_sub_r2_Const1,
+                    );
+                    opcodes_vector.push(next_opcode);
+                    return binloc + 1 as u16;
+                }
+                "r3" => {
+                    let next_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_4,
+                        crate::bindings::eOpcodes_opcode_sub_r3_Const1,
+                    );
+                    opcodes_vector.push(next_opcode);
+                    return binloc + 1 as u16;
+                }
+                "r4" => {
+                    let next_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_4,
+                        crate::bindings::eOpcodes_opcode_sub_r4_Const1,
+                    );
+                    opcodes_vector.push(next_opcode);
+                    return binloc + 1 as u16;
+                }
+                _ => {
+                    panic!("Error with statement: {:?}", elem);
+                }
+            }
+        }
+        false => {
+            // Then it has matched the second register, and we need to get the first register
+            let rx =
+                Regex::new(r".*?[[:space:]][[:word:]]+.*?[[:space:]]([[:word:]]+).*?").unwrap();
+            let other_matched_string = &rx.captures(&elem).unwrap()[1];
+
+            match matched_string {
+                "r1" => {
+                    match other_matched_string {
+                        "r2" => {
+                            let another_opcode: OperationalCode = OperationalCode::new(
+                                binloc + crate::bindings::eOpcodes_opcode_Timer_2,
+                                crate::bindings::eOpcodes_opcode_sub_r1_r2,
+                            );
+                            opcodes_vector.push(another_opcode);
+                        }
+                        "r3" => {
+                            let another_opcode: OperationalCode = OperationalCode::new(
+                                binloc + crate::bindings::eOpcodes_opcode_Timer_2,
+                                crate::bindings::eOpcodes_opcode_sub_r1_r3,
+                            );
+                            opcodes_vector.push(another_opcode);
+                        }
+                        "r4" => {
+                            let another_opcode: OperationalCode = OperationalCode::new(
+                                binloc + crate::bindings::eOpcodes_opcode_Timer_2,
+                                crate::bindings::eOpcodes_opcode_sub_r1_r4,
+                            );
+                            opcodes_vector.push(another_opcode);
+                        }
+                        _ => {
+                            panic!("Error with statement: {:?}", elem);
+                        }
+                    }
+                    return binloc + 1 as u16;
+                }
+                "r2" => {
+                    match other_matched_string {
+                        "r1" => {
+                            let another_opcode: OperationalCode = OperationalCode::new(
+                                binloc + crate::bindings::eOpcodes_opcode_Timer_2,
+                                crate::bindings::eOpcodes_opcode_sub_r2_r1,
+                            );
+                            opcodes_vector.push(another_opcode);
+                        }
+                        "r3" => {
+                            let another_opcode: OperationalCode = OperationalCode::new(
+                                binloc + crate::bindings::eOpcodes_opcode_Timer_2,
+                                crate::bindings::eOpcodes_opcode_sub_r2_r3,
+                            );
+                            opcodes_vector.push(another_opcode);
+                        }
+                        "r4" => {
+                            let another_opcode: OperationalCode = OperationalCode::new(
+                                binloc + crate::bindings::eOpcodes_opcode_Timer_2,
+                                crate::bindings::eOpcodes_opcode_sub_r2_r4,
+                            );
+                            opcodes_vector.push(another_opcode);
+                        }
+                        _ => {
+                            panic!("Error with statement: {:?}", elem);
+                        }
+                    }
+                    return binloc + 1 as u16;
+                }
+                "r3" => {
+                    match other_matched_string {
+                        "r1" => {
+                            let another_opcode: OperationalCode = OperationalCode::new(
+                                binloc + crate::bindings::eOpcodes_opcode_Timer_2,
+                                crate::bindings::eOpcodes_opcode_sub_r3_r1,
+                            );
+                            opcodes_vector.push(another_opcode);
+                        }
+                        "r2" => {
+                            let another_opcode: OperationalCode = OperationalCode::new(
+                                binloc + crate::bindings::eOpcodes_opcode_Timer_2,
+                                crate::bindings::eOpcodes_opcode_sub_r3_r2,
+                            );
+                            opcodes_vector.push(another_opcode);
+                        }
+                        "r4" => {
+                            let another_opcode: OperationalCode = OperationalCode::new(
+                                binloc + crate::bindings::eOpcodes_opcode_Timer_2,
+                                crate::bindings::eOpcodes_opcode_sub_r3_r4,
+                            );
+                            opcodes_vector.push(another_opcode);
+                        }
+                        _ => {
+                            panic!("Error with statement: {:?}", elem);
+                        }
+                    }
+                    return binloc + 1 as u16;
+                }
+                "r4" => {
+                    match other_matched_string {
+                        "r1" => {
+                            let another_opcode: OperationalCode = OperationalCode::new(
+                                binloc + crate::bindings::eOpcodes_opcode_Timer_2,
+                                crate::bindings::eOpcodes_opcode_sub_r4_r1,
+                            );
+                            opcodes_vector.push(another_opcode);
+                        }
+                        "r2" => {
+                            let another_opcode: OperationalCode = OperationalCode::new(
+                                binloc + crate::bindings::eOpcodes_opcode_Timer_2,
+                                crate::bindings::eOpcodes_opcode_sub_r4_r2,
+                            );
+                            opcodes_vector.push(another_opcode);
+                        }
+                        "r3" => {
+                            let another_opcode: OperationalCode = OperationalCode::new(
+                                binloc + crate::bindings::eOpcodes_opcode_Timer_2,
+                                crate::bindings::eOpcodes_opcode_sub_r4_r3,
+                            );
+                            opcodes_vector.push(another_opcode);
+                        }
+                        _ => {
+                            panic!("Error with statement: {:?}", elem);
+                        }
+                    }
+                    return binloc + 1 as u16;
+                }
+                _ => {
+                    panic!("Error with statement: {:?}", elem);
+                }
+            }
+        }
+    }
+}
+
+pub fn def_add(elem: String, mut binloc: u16, opcodes_vector: &mut Vec<OperationalCode>) -> u16 {
+    // println!("ORIGINAL STRING: {:?}", elem);
+    let rx = Regex::new(r".*[[:space:]]([[:word:]]+)").unwrap();
+    let rxdigit = Regex::new(r".*[[:space:]]#(-?[[:digit:]]+)").unwrap();
+    let matched_string = &rx.captures(&elem).unwrap()[1];
+    //let second_matched_string = &rx.captures(&elem).unwrap()[2];
+    let immediate_count = &rxdigit.captures_iter(&elem).count();
+    let mut use_immediate_value: bool = false;
+    let mut rxdigitvalue: i32 = 0;
+
+    match immediate_count {
+        1 => {
+            rxdigitvalue = rxdigit.captures(&elem).unwrap()[1]
+                .parse::<i32>()
+                .unwrap_or_default();
+            if rxdigitvalue > 255 {
+                panic!("Immediate value greater than 255 at: {:?}", elem);
+            }
+            use_immediate_value = true;
+        }
+        _ => {
+            //println!("immediate_count: {:?} ", immediate_count);
+        }
+    }
+
+    /* Everything below is copied from the mov functions. Need to change the opcodes which it uses 
+        and some of the logic. 
+    */
+
+    match use_immediate_value {
+        true => {
+            let another_opcode: OperationalCode = OperationalCode::new(
+                binloc + crate::bindings::eOpcodes_opcode_Timer_2,
+                crate::bindings::eOpcodes_opcode_load_mar + crate::bindings::eOpcodes_opcode_inc_pc,
+            );
+            opcodes_vector.push(another_opcode);
+            binloc += 1 as u16;
+            let immediate_address: OperationalCode = OperationalCode::new(
+                binloc + 1 + crate::bindings::eOpcodes_opcode_Timer_3, rxdigitvalue as u16,
+            );
+            opcodes_vector.push(immediate_address);
+            binloc += 1 as u16;
+            match matched_string {
+                "r1" => {
+                    let next_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_4,
+                        crate::bindings::eOpcodes_opcode_add_r1_Const1,
+                    );
+                    opcodes_vector.push(next_opcode);
+                    return binloc + 1 as u16;
+                }
+                "r2" => {
+                    let next_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_4,
+                        crate::bindings::eOpcodes_opcode_add_r2_Const1,
+                    );
+                    opcodes_vector.push(next_opcode);
+                    return binloc + 1 as u16;
+                }
+                "r3" => {
+                    let next_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_4,
+                        crate::bindings::eOpcodes_opcode_add_r3_Const1,
+                    );
+                    opcodes_vector.push(next_opcode);
+                    return binloc + 1 as u16;
+                }
+                "r4" => {
+                    let next_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_4,
+                        crate::bindings::eOpcodes_opcode_add_r4_Const1,
+                    );
+                    opcodes_vector.push(next_opcode);
+                    return binloc + 1 as u16;
+                }
+                _ => {
+                    panic!("Error with statement: {:?}", elem);
+                }
+            }
+        }
+        false => {
+            // Then it has matched the second register, and we need to get the first register
+            let rx =
+                Regex::new(r".*?[[:space:]][[:word:]]+.*?[[:space:]]([[:word:]]+).*?").unwrap();
+            let other_matched_string = &rx.captures(&elem).unwrap()[1];
+
+            match matched_string {
+                "r1" => {
+                    match other_matched_string {
+                        "r2" => {
+                            let another_opcode: OperationalCode = OperationalCode::new(
+                                binloc + crate::bindings::eOpcodes_opcode_Timer_2,
+                                crate::bindings::eOpcodes_opcode_add_r1_r2,
+                            );
+                            opcodes_vector.push(another_opcode);
+                        }
+                        "r3" => {
+                            let another_opcode: OperationalCode = OperationalCode::new(
+                                binloc + crate::bindings::eOpcodes_opcode_Timer_2,
+                                crate::bindings::eOpcodes_opcode_add_r1_r3,
+                            );
+                            opcodes_vector.push(another_opcode);
+                        }
+                        "r4" => {
+                            let another_opcode: OperationalCode = OperationalCode::new(
+                                binloc + crate::bindings::eOpcodes_opcode_Timer_2,
+                                crate::bindings::eOpcodes_opcode_add_r1_r4,
+                            );
+                            opcodes_vector.push(another_opcode);
+                        }
+                        _ => {
+                            panic!("Error with statement: {:?}", elem);
+                        }
+                    }
+                    return binloc + 1 as u16;
+                }
+                "r2" => {
+                    match other_matched_string {
+                        "r1" => {
+                            let another_opcode: OperationalCode = OperationalCode::new(
+                                binloc + crate::bindings::eOpcodes_opcode_Timer_2,
+                                crate::bindings::eOpcodes_opcode_add_r2_r1,
+                            );
+                            opcodes_vector.push(another_opcode);
+                        }
+                        "r3" => {
+                            let another_opcode: OperationalCode = OperationalCode::new(
+                                binloc + crate::bindings::eOpcodes_opcode_Timer_2,
+                                crate::bindings::eOpcodes_opcode_add_r2_r3,
+                            );
+                            opcodes_vector.push(another_opcode);
+                        }
+                        "r4" => {
+                            let another_opcode: OperationalCode = OperationalCode::new(
+                                binloc + crate::bindings::eOpcodes_opcode_Timer_2,
+                                crate::bindings::eOpcodes_opcode_add_r2_r4,
+                            );
+                            opcodes_vector.push(another_opcode);
+                        }
+                        _ => {
+                            panic!("Error with statement: {:?}", elem);
+                        }
+                    }
+                    return binloc + 1 as u16;
+                }
+                "r3" => {
+                    match other_matched_string {
+                        "r1" => {
+                            let another_opcode: OperationalCode = OperationalCode::new(
+                                binloc + crate::bindings::eOpcodes_opcode_Timer_2,
+                                crate::bindings::eOpcodes_opcode_add_r3_r1,
+                            );
+                            opcodes_vector.push(another_opcode);
+                        }
+                        "r2" => {
+                            let another_opcode: OperationalCode = OperationalCode::new(
+                                binloc + crate::bindings::eOpcodes_opcode_Timer_2,
+                                crate::bindings::eOpcodes_opcode_add_r3_r2,
+                            );
+                            opcodes_vector.push(another_opcode);
+                        }
+                        "r4" => {
+                            let another_opcode: OperationalCode = OperationalCode::new(
+                                binloc + crate::bindings::eOpcodes_opcode_Timer_2,
+                                crate::bindings::eOpcodes_opcode_add_r3_r4,
+                            );
+                            opcodes_vector.push(another_opcode);
+                        }
+                        _ => {
+                            panic!("Error with statement: {:?}", elem);
+                        }
+                    }
+                    return binloc + 1 as u16;
+                }
+                "r4" => {
+                    match other_matched_string {
+                        "r1" => {
+                            let another_opcode: OperationalCode = OperationalCode::new(
+                                binloc + crate::bindings::eOpcodes_opcode_Timer_2,
+                                crate::bindings::eOpcodes_opcode_add_r4_r1,
+                            );
+                            opcodes_vector.push(another_opcode);
+                        }
+                        "r2" => {
+                            let another_opcode: OperationalCode = OperationalCode::new(
+                                binloc + crate::bindings::eOpcodes_opcode_Timer_2,
+                                crate::bindings::eOpcodes_opcode_add_r4_r2,
+                            );
+                            opcodes_vector.push(another_opcode);
+                        }
+                        "r3" => {
+                            let another_opcode: OperationalCode = OperationalCode::new(
+                                binloc + crate::bindings::eOpcodes_opcode_Timer_2,
+                                crate::bindings::eOpcodes_opcode_add_r4_r3,
+                            );
+                            opcodes_vector.push(another_opcode);
+                        }
+                        _ => {
+                            panic!("Error with statement: {:?}", elem);
+                        }
+                    }
+                    return binloc + 1 as u16;
+                }
+                _ => {
+                    panic!("Error with statement: {:?}", elem);
+                }
+            }
+        }
+    }
+}
+
 pub fn def_mov(elem: String, mut binloc: u16, opcodes_vector: &mut Vec<OperationalCode>) -> u16 {
     // println!("ORIGINAL STRING: {:?}", elem);
     let rx = Regex::new(r".*[[:space:]]([[:word:]]+)").unwrap();
@@ -36,45 +758,52 @@ pub fn def_mov(elem: String, mut binloc: u16, opcodes_vector: &mut Vec<Operation
         }
     }
 
+    let another_opcode: OperationalCode = OperationalCode::new(
+        binloc + crate::bindings::eOpcodes_opcode_Timer_2,
+        crate::bindings::eOpcodes_opcode_load_mar + crate::bindings::eOpcodes_opcode_inc_pc,
+    );
+    opcodes_vector.push(another_opcode);
+    binloc += 1 as u16;
+    let immediate_address: OperationalCode = OperationalCode::new(
+        binloc + 1 + crate::bindings::eOpcodes_opcode_Timer_3, rxdigitvalue as u16,
+    );
+    opcodes_vector.push(immediate_address);
+    binloc += 1 as u16;
+
     match use_immediate_value {
         true => {
-            // /////////// ===========================================  //////////////////
-            //  We have a problem here with the opcodes and need to adjust the C program
-            //  that loads the EEProms. To move a constant you need to have:
-            //  Timer0/1 load and fetch
-            //  Timer 2 load MAR with address of next memory location,
-            //  Timer 3 assert MDR on to the databus and latch the register.
-            //  I think the code below is wrong. Need to have a think.
-            // /////////// ===========================================  //////////////////
-            // Then matched string is the register to move immediate into it.
-            // println!("immediate = {:?} ", rxdigitvalue);
             match matched_string {
                 "r1" => {
-                    let another_opcode: OperationalCode = OperationalCode::new(
-                        binloc + crate::bindings::eOpcodes_opcode_Timer_2,
-                        crate::bindings::eOpcodes_opcode_load_mar,
-                    );
-                    opcodes_vector.push(another_opcode);
-                    binloc += 1 as u16;
-                    let immediate_address: OperationalCode = OperationalCode::new(
-                        binloc + 1 + crate::bindings::eOpcodes_opcode_Timer_3, rxdigitvalue as u16,
-                    );
-                    opcodes_vector.push(immediate_address);
-                    binloc += 1 as u16;
+
                     let next_opcode: OperationalCode = OperationalCode::new(
-                        binloc + crate::bindings::eOpcodes_opcode_Timer_3,
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_4,
                         crate::bindings::eOpcodes_opcode_mov_r1_Const1,
                     );
                     opcodes_vector.push(next_opcode);
                     return binloc + 1 as u16;
                 }
                 "r2" => {
+                    let next_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_4,
+                        crate::bindings::eOpcodes_opcode_mov_r2_Const1,
+                    );
+                    opcodes_vector.push(next_opcode);
                     return binloc + 1 as u16;
                 }
                 "r3" => {
+                    let next_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_4,
+                        crate::bindings::eOpcodes_opcode_mov_r3_Const1,
+                    );
+                    opcodes_vector.push(next_opcode);
                     return binloc + 1 as u16;
                 }
                 "r4" => {
+                    let next_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_4,
+                        crate::bindings::eOpcodes_opcode_mov_r4_Const1,
+                    );
+                    opcodes_vector.push(next_opcode);
                     return binloc + 1 as u16;
                 }
                 _ => {
@@ -387,13 +1116,13 @@ pub fn def_branch(
             return binloc;
         } // BEQ zero flag set
         2 => {
-            println!("INSIDE BNE: {:?}", elem);
+            //println!("INSIDE BNE: {:?}", elem);
             let rx = Regex::new(r".*[[:space:]]([[:word:]]+)").unwrap();
             let matched_string = &rx.captures(&elem).unwrap()[1];
             for item in label_list.iter_mut() {
                 if item.get_name() == matched_string {
-                    println!("BEQ item_name: {:?}", item.get_name());
-                    println!("BEQ regex_match: {:?}", matched_string);
+                    //println!("BEQ item_name: {:?}", item.get_name());
+                    //println!("BEQ regex_match: {:?}", matched_string);
                     let next_opcode: OperationalCode = OperationalCode::new(
                         binloc + crate::bindings::eOpcodes_opcode_Timer_2,
                         item.get_location(),

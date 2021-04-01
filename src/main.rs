@@ -2,8 +2,6 @@
 #![allow(unused_imports)]
 #[allow(dead_code)]
 #[allow(unused_must_use)]
-
-
 pub mod bindings;
 pub mod instruction;
 pub mod my_operation;
@@ -15,7 +13,7 @@ extern crate clap;
 use clap::{App, Arg, SubCommand};
 extern crate regex;
 use bindings::eOpcodes;
-use instruction::{def_branch, def_label, def_mov, def_shift};
+use instruction::{def_branch, def_label, def_mov, def_shift, def_add, def_sub, def_logic, def_inc_dec};
 use my_operation::{Label, OperationalCode, Unresolved};
 use regex::Regex;
 extern crate byteorder;
@@ -134,21 +132,36 @@ fn main() {
                 Token::SHL(inner) => {
                     binloc = def_shift(1, inner, binloc, &mut opcodes_vector);
                 }
-                Token::ADD(inner) => println!("{:?}", inner),
-                Token::SUB(inner) => println!("{:?}", inner),
-                Token::AND(inner) => println!("{:?}", inner),
-                Token::ORR(inner) => println!("{:?}", inner),
-                Token::XOR(inner) => println!("{:?}", inner),
-                Token::NOT(inner) => println!("{:?}", inner),
+                Token::ADD(inner) => {
+                    binloc = def_add(inner, binloc, &mut opcodes_vector);
+                },
+                Token::SUB(inner) => {
+                    binloc = def_sub(inner, binloc, &mut opcodes_vector);
+                },
+                Token::AND(inner) => {
+                    binloc = def_logic(2, inner, binloc, &mut opcodes_vector);
+                },
+                Token::ORR(inner) => {
+                    binloc = def_logic(3, inner, binloc, &mut opcodes_vector);
+                },
+                Token::XOR(inner) => {
+                    binloc = def_logic(1, inner, binloc, &mut opcodes_vector);
+                },
+                Token::NOT(inner) => {
+                    binloc = def_logic(0, inner, binloc, &mut opcodes_vector);
+                },
                 Token::CMP(inner) => println!("{:?}", inner),
                 Token::MOV(inner) => {
-                    //println!("{:?}", inner);
                     binloc = def_mov(inner, binloc, &mut opcodes_vector);
                 }
                 Token::LDR(inner) => println!("{:?}", inner),
                 Token::STR(inner) => println!("{:?}", inner),
-                Token::INC(inner) => println!("{:?}", inner),
-                Token::DEC(inner) => println!("{:?}", inner),
+                Token::INC(inner) => {
+                    binloc = def_inc_dec(0, inner, binloc, &mut opcodes_vector);
+                },
+                Token::DEC(inner) => {
+                    binloc = def_inc_dec(1, inner, binloc, &mut opcodes_vector);
+                },
                 Token::CCF => println!("{:?}", elem),
                 Token::MEMORYALIAS(inner) => println!("{:?}", inner),
                 Token::PUSH(inner) => println!("{:?}", inner),
@@ -245,7 +258,6 @@ fn main() {
             }
         }
     }
-
 }
 
 pub fn lcaseit(lex: &mut Lexer<Token>) -> String {
@@ -273,15 +285,15 @@ pub enum Token {
     MOV(String),
 
     #[regex(
-        "[[:space:]]+add[[:space:]]+([[:word:]]+)",
+        "[[:space:]]+ADD[[:space:]]+([[:word:]])+[[:space:]]+#*(-?[[:word:]])+",
         lcaseit,
-        priority = 1,
+        priority = 2,
         ignore(ascii_case)
     )]
     ADD(String),
 
     #[regex(
-        "[[:space:]]+sub[[:space:]]+([[:word:]]+)",
+        "[[:space:]]+ADD[[:space:]]+([[:word:]])+[[:space:]]+#*(-?[[:word:]])+",
         lcaseit,
         priority = 1,
         ignore(ascii_case)
@@ -321,7 +333,7 @@ pub enum Token {
     NOT(String),
 
     #[regex(
-        "[[:space:]]+CMP[[:space:]]+([[:word:]]+)",
+        "[[:space:]]+ADD[[:space:]]+([[:word:]])+[[:space:]]+#*(-?[[:word:]])+",
         lcaseit,
         priority = 1,
         ignore(ascii_case)
@@ -329,7 +341,7 @@ pub enum Token {
     CMP(String),
 
     #[regex(
-        "[[:space:]]+LDR[[:space:]]+([[:word:]]+)",
+        "[[:space:]]+ADD[[:space:]]+([[:word:]])+[[:space:]]+#*(-?[[:word:]])+",
         lcaseit,
         priority = 1,
         ignore(ascii_case)
@@ -337,7 +349,7 @@ pub enum Token {
     LDR(String),
 
     #[regex(
-        "[[:space:]]+STR[[:space:]]+([[:word:]]+)",
+        "[[:space:]]+ADD[[:space:]]+([[:word:]])+[[:space:]]+#*(-?[[:word:]])+",
         lcaseit,
         priority = 1,
         ignore(ascii_case)
