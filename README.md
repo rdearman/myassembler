@@ -33,6 +33,6 @@ POP
 
 label:
 
-_variable_name .asciz " +"
-_variable_name .byte 0
+$variable_name .asciz " +"
+$variable_name .byte 0
  </pre>
