@@ -150,7 +150,7 @@ fn main() {
                 Token::NOT(inner) => {
                     binloc = def_logic(0, inner, binloc, &mut opcodes_vector);
                 },
-                Token::CMP(inner) => println!("{:?}", inner),
+                Token::CMP(inner) => println!("Comparisions require hardware update with a 74LS684 chip {:?}", inner),
                 Token::MOV(inner) => {
                     binloc = def_mov(inner, binloc, &mut opcodes_vector);
                 }
@@ -162,7 +162,14 @@ fn main() {
                 Token::DEC(inner) => {
                     binloc = def_inc_dec(1, inner, binloc, &mut opcodes_vector);
                 },
-                Token::CCF => println!("{:?}", elem),
+                Token::CCF => {
+                    let another_opcode: OperationalCode = OperationalCode::new(
+                        binloc + crate::bindings::eOpcodes_opcode_Timer_2,
+                        crate::bindings::eOpcodes_opcode_load_mar + crate::bindings::eOpcodes_opcode_clear_carry,
+                    );
+                    opcodes_vector.push(another_opcode);
+                    binloc += 1 as u16;
+                },
                 Token::MEMORYALIAS(inner) => println!("{:?}", inner),
                 Token::PUSH(inner) => println!("{:?}", inner),
                 Token::POP(inner) => println!("{:?}", inner),
@@ -173,16 +180,16 @@ fn main() {
                 _ => (),
             }
 
+        /*  Match the number of bytecode instructions and sent the reset signal
+            to avoid wasting clock cyles.
+        */
             match timer_count {
                 0 => {
-                    // throw away timer 0 & 1 since we don't have any matches and reset the count.
-                    //println!("timer_count = 0");
                     opcodes_vector.pop();
                     opcodes_vector.pop();
                     binloc -= 2;
                 }
                 1 => {
-                    //println!("timer_count = 1");
                     let terary_microcode: OperationalCode = OperationalCode::new(
                         binloc + bindings::eOpcodes_opcode_Timer_2,
                         bindings::eOpcodes_opcode_reset_instr_timer,
@@ -191,7 +198,6 @@ fn main() {
                     opcodes_vector.push(terary_microcode);
                 }
                 2 => {
-                    //println!("timer_count = 2");
                     let terary_microcode: OperationalCode = OperationalCode::new(
                         binloc + bindings::eOpcodes_opcode_Timer_3,
                         bindings::eOpcodes_opcode_reset_instr_timer,
@@ -200,7 +206,6 @@ fn main() {
                     opcodes_vector.push(terary_microcode);
                 }
                 3 => {
-                    //println!("timer_count = 3");
                     let terary_microcode: OperationalCode = OperationalCode::new(
                         binloc + bindings::eOpcodes_opcode_Timer_4,
                         bindings::eOpcodes_opcode_reset_instr_timer,
@@ -209,7 +214,6 @@ fn main() {
                     opcodes_vector.push(terary_microcode);
                 }
                 4 => {
-                    //println!("timer_count = 4");
                     let terary_microcode: OperationalCode = OperationalCode::new(
                         binloc + bindings::eOpcodes_opcode_Timer_5,
                         bindings::eOpcodes_opcode_reset_instr_timer,
@@ -218,7 +222,6 @@ fn main() {
                     opcodes_vector.push(terary_microcode);
                 }
                 5 => {
-                    //println!("timer_count = 5");
                     let terary_microcode: OperationalCode = OperationalCode::new(
                         binloc + bindings::eOpcodes_opcode_Timer_6,
                         bindings::eOpcodes_opcode_reset_instr_timer,
