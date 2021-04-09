@@ -11,7 +11,9 @@ start:
 	mov r1 #55
 	mov r2 #2
 	ldr r1 $life_the_universe_and_everything // load into r1 the value at memory address pointed to by
-	ldr r3 [r4 #0]
+	ldr r1 [r4 #32]
+	ldr r2 [r4 r1]
+	ldr r3 [r4 #255]
 	str r1 $life_the_universe_and_everything
 	str r3 [r4 #125]
 	str r4 [r1]
