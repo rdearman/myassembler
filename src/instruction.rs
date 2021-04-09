@@ -13,22 +13,25 @@ use regex::Regex;
 
 pub fn def_load_memory(instr: i32, elem: String, mut binloc: u16, opcodes_vector: &mut Vec<OperationalCode>) -> u16 {
     println!("elem={:?} \n",elem );
-    /* CHANGE THE LEXER! USE LDRV (ldr variable) AND LDRM (ldr memory) Then just call this function with the correct instr variable. */
+    /*
+        ISSUES
+        1 There is a problem here when the offset is a register. So need to check for the # character and assume it 
+            is a register as the offset otherwise.
+        2 This is quite a complex operation since it will need to load the value of the register. might be more than 
+            5 microcodes, which is the limit. (Might be able to change the HW to support more than 7 timers total)
+        3 A variable can be either a pointer to a string, or a byte (number), so need to work out which it is. 
+        4 It is also possible fr the programmer to just want to load the memory adress pointed at by another register 
+            e.g. "LDR r1 [r4]"
+    */
     match instr {
-        0 => { // Load Variable
+        0 => { // Load Variable (issue 3)
             let rx = Regex::new(r"[[:space:]]+ldr[[:space:]]+([[:word:]]+)[[:space:]]+\$*-?[[:word:]]+").unwrap();
             let rxvariable = Regex::new(r".*[[:space:]]+(\$*-?[[:word:]]+)").unwrap();
             let matched_register = &rx.captures(&elem).unwrap()[1];
             let matched_variable = &rxvariable.captures(&elem).unwrap()[1];
             println!("matched_register={:?} \t matched_variable={:?}\n",matched_register, matched_variable );
         }
-        1 => { // Load Memory location + Offest
-            /*
-                There is a problem here when the offset is a register. So need to check for the # character and assume it 
-                is a register as the offset if not.
-                This is quite a complex operation since it will need to load the value of the register. might be more than 
-                5 microcodes, which is the limit. (Might be able to change the HW to support more than 7 timers total)
-            */
+        1 => { // Load Memory location + Offest (issue 1 & 2)
             let rx = Regex::new(r"[[:space:]]+ldr[[:space:]]+([[:word:]]+)[[:space:]]+[\[]+.*").unwrap();
             let rxlocation = Regex::new(r".*[\[]+[[:space:]]*?([[:word:]]+).*").unwrap();
             let rxoffset = Regex::new(r".*[\[]+[[:space:]]*?[[:word:]]+[[:space:]]*?([[:word:]]+)[\]]+").unwrap();

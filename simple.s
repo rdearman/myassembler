@@ -14,6 +14,7 @@ start:
 	ldr r1 [r4 #32]
 	ldr r2 [r4 r1]
 	ldr r3 [r4 #255]
+	ldr r3 [r4]
 	str r1 $life_the_universe_and_everything
 	str r3 [r4 #125]
 	str r4 [r1]
