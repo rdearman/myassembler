@@ -4,7 +4,7 @@ This is a very super hacky attempt at creation of an assembler for my 8-bit brea
 
 I've designed the assembly language to be like GAS syntax, but it doesn't support most things.
 
-The plan is to support the following, where reg is a register, arg is an immedaite argument (number):
+The plan is to support the following, where reg is a register, arg is an immediate argument (number):
 
  <pre>
 /* ------------- My Assembler Language ----------------
