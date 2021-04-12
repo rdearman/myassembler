@@ -14,10 +14,10 @@ AND reg reg
 ORR reg reg
 XOR reg reg
 NOT reg
-CMP reg arg
-MOV reg, reg | arg
-LDR reg mem
-STR reg mem
+CMP reg reg | arg
+MOV reg reg | arg
+LDR reg MEM | MEM + OFFSET
+STR reg MEM | MEM + OFFSET
 SHR reg
 SHL reg
 INC reg

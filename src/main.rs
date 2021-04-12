@@ -13,7 +13,8 @@ extern crate clap;
 use clap::{App, Arg, SubCommand};
 extern crate regex;
 use bindings::eOpcodes;
-use instruction::{def_branch, def_label, def_mov, def_shift, def_add, def_sub, def_logic, def_inc_dec, def_load_memory};
+use instruction::*;
+// use instruction::{def_branch, def_label, def_mov, def_shift, def_add, def_sub, def_logic, def_inc_dec, def_load_memory,def_store_memory};
 use my_operation::{Label, OperationalCode, Unresolved};
 use regex::Regex;
 extern crate byteorder;
@@ -160,7 +161,12 @@ fn main() {
                 Token::LDRM(inner) => {
                     binloc = def_load_memory(1, inner, binloc, &mut opcodes_vector);
                 }
-                Token::STR(inner) => println!("{:?}", inner),
+                Token::STRV(inner) => {
+                    binloc = def_store_memory(0, inner, binloc, &mut opcodes_vector);
+                }
+                Token::STRM(inner) => {
+                    binloc = def_store_memory(1, inner, binloc, &mut opcodes_vector);
+                }
                 Token::INC(inner) => {
                     binloc = def_inc_dec(0, inner, binloc, &mut opcodes_vector);
                 },
@@ -365,12 +371,27 @@ pub enum Token {
     LDRM(String),
 
     #[regex(
-        "[[:space:]]+ADD[[:space:]]+([[:word:]])+[[:space:]]+#*(-?[[:word:]])+",
+        r"[[:space:]]+str[[:space:]]+([[:word:]])+[[:space:]]+\$*(-?[[:word:]])+",
         lcaseit,
         priority = 1,
         ignore(ascii_case)
     )]
-    STR(String),
+    STRV(String),
+
+    #[regex(
+        r"[[:space:]]+str[[:space:]]+([[:word:]]+[[:space:]]+[\[]+.*)",
+        lcaseit,
+        priority = 1,
+        ignore(ascii_case)
+    )]
+    STRM(String),
+    // #[regex(
+    //     "[[:space:]]+ADD[[:space:]]+([[:word:]])+[[:space:]]+#*(-?[[:word:]])+",
+    //     lcaseit,
+    //     priority = 1,
+    //     ignore(ascii_case)
+    // )]
+    // STR(String),
 
     #[regex(
         "[[:space:]]+SHR[[:space:]]+([[:word:]]+)",

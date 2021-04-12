@@ -11,7 +11,7 @@ use crate::bindings::eOpcodes;
 use crate::my_operation::{Label, OperationalCode, Unresolved};
 use regex::Regex;
 
-pub fn def_load_memory(instr: i32, elem: String, mut binloc: u16, opcodes_vector: &mut Vec<OperationalCode>) -> u16 {
+pub fn def_store_memory(instr: i32, elem: String, mut binloc: u16, opcodes_vector: &mut Vec<OperationalCode>) -> u16 {
     println!("elem={:?} \n",elem );
     /*
         ISSUES
@@ -22,6 +22,78 @@ pub fn def_load_memory(instr: i32, elem: String, mut binloc: u16, opcodes_vector
         3 A variable can be either a pointer to a string, or a byte (number), so need to work out which it is. 
         4 It is also possible fr the programmer to just want to load the memory adress pointed at by another register 
             e.g. "LDR r1 [r4]"
+    */
+    match instr {
+        0 => { // Load Variable (issue 3)
+            let rx = Regex::new(r"[[:space:]]+str[[:space:]]+([[:word:]]+)[[:space:]]+\$*-?[[:word:]]+").unwrap();
+            let rxvariable = Regex::new(r".*[[:space:]]+(\$*-?[[:word:]]+)").unwrap();
+            let matched_register = &rx.captures(&elem).unwrap()[1];
+            let matched_variable = &rxvariable.captures(&elem).unwrap()[1];
+            println!("matched_register={:?} \t matched_variable={:?}\n",matched_register, matched_variable );
+        }
+        1 => { // Load Memory location + Offest (issue 1 & 2)
+            let rx = Regex::new(r"[[:space:]]+str[[:space:]]+([[:word:]]+)[[:space:]]+[\[]+.*").unwrap();
+            let rxlocation = Regex::new(r".*[\[]+[[:space:]]*?([[:word:]]+).*").unwrap();
+            let rxoffset = Regex::new(r".*[\[]+[[:space:]]*?[[:word:]]+[[:space:]]*?([[:word:]]+)[\]]+").unwrap();
+            // offset can be a register or an immedaite value. Check if immedaite first.
+            let rxdigit = Regex::new(r".*[[:space:]]#(-?[[:digit:]]+)").unwrap();
+            let immediate_count = &rxdigit.captures_iter(&elem).count();
+            let mut use_immediate_value: bool = false;
+            let mut rxdigitvalue: i32 = 0;
+            let mut matched_offset: &str = "string";
+
+            match immediate_count {
+                1 => {
+                    rxdigitvalue = rxdigit.captures(&elem).unwrap()[1]
+                        .parse::<i32>()
+                        .unwrap_or_default();
+                    if rxdigitvalue > 255 {
+                        panic!("Immediate value greater than 255 at: {:?}", elem);
+                    }
+                    use_immediate_value = true;
+                }
+                _ => {
+                    matched_offset = &rxoffset.captures(&elem).unwrap().get(1).unwrap().as_str();
+                }
+            }
+
+            let matched_register = &rx.captures(&elem).unwrap()[1];
+            let matched_variable = &rxlocation.captures(&elem).unwrap()[1];
+            if use_immediate_value
+            {
+                println!("matched_register={:?} \t matched_variable={:?} \t matched_offset={:?}\n",matched_register, matched_variable, rxdigitvalue );
+            }
+            else {
+                println!("matched_register={:?} \t matched_variable={:?} \t matched_offset={:?}\n",matched_register, matched_variable, matched_offset );
+            }
+
+        }
+        _ => {
+            // panic!("Problem with \"{:?}\" in function def_load_memory", elem);
+        }
+    }
+
+
+    let another_opcode: OperationalCode = OperationalCode::new(
+        binloc + crate::bindings::eOpcodes_opcode_Timer_2,
+        crate::bindings::eOpcodes_opcode_load_mar + crate::bindings::eOpcodes_opcode_inc_pc,
+    );
+    opcodes_vector.push(another_opcode);
+    return binloc + 1 as u16;
+
+}
+
+pub fn def_load_memory(instr: i32, elem: String, mut binloc: u16, opcodes_vector: &mut Vec<OperationalCode>) -> u16 {
+    println!("elem={:?} \n",elem );
+    /*
+        ISSUES
+        1 There is a problem here when the offset is a register. So need to check for the # character and assume it 
+            is a register as the offset otherwise.
+        2 This is quite a complex operation since it will need to load the value of the register. might be more than 
+            5 microcodes, which is the limit. (Might be able to change the HW to support more than 7 timers total)
+        3 A variable can be either a pointer to a string, or a byte (number), so need to work out which it is. 
+        4 It is also possible fr the programmer to just want to load the memory adress pointed at by another register 
+            e.g. "LDR r1 [r4]" (This case they will need to put #0 and offset of zero)
     */
     match instr {
         0 => { // Load Variable (issue 3)
@@ -40,7 +112,7 @@ pub fn def_load_memory(instr: i32, elem: String, mut binloc: u16, opcodes_vector
             let immediate_count = &rxdigit.captures_iter(&elem).count();
             let mut use_immediate_value: bool = false;
             let mut rxdigitvalue: i32 = 0;
-            let mut matched_offset: &str = "";
+            let mut matched_offset: &str = "string";
 
             match immediate_count {
                 1 => {
@@ -53,7 +125,7 @@ pub fn def_load_memory(instr: i32, elem: String, mut binloc: u16, opcodes_vector
                     use_immediate_value = true;
                 }
                 _ => {
-                    let matched_offset = &rxoffset.captures(&elem).unwrap().get(1).unwrap().as_str();
+                    matched_offset = &rxoffset.captures(&elem).unwrap().get(1).unwrap().as_str();
                 }
             }
 
