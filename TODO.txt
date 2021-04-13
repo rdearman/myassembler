@@ -1,17 +1,19 @@
-[] create functions for all instructions
+( [\] Partially complete [X] complete )
+
+============ WORKING ON ============
+[] complete functions for all instructions 
     [] Token::CCF
-    [] Token::MEMORYALIAS(inner)
-    [] Token::PUSH(inner)
-    [] Token::POP(inner)
-    []Token::CMP(inner)
-    []Token::LDR(inner)
-    []Token::STR(inner)
-[] support the _data label. the underscore indicated variable name.
+    [\] Token::PUSH(inner)
+    [\] Token::POP(inner)
+    [] Token::CMP(inner)
+    [\] Token::LDR(inner)
+    [\] Token::STR(inner)
 [] way to separate program memory from storage memor (probably hardware not software)
 [] ADD, MOV, SUB functions are very hacky and should be changed to more elegant solution since they are almost carobon copied.
+[] Need validation rules, for example: for each POP there should have been a PUSH
 
 ============
-
+[X] support the _data label. the underscore indicated variable name.
 [X] import bytecode to generate instructions.
 [X] first two bytecodes are always the same, make the constructor default: 
     load PC into MAR

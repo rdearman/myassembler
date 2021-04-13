@@ -11,8 +11,71 @@ use crate::bindings::eOpcodes;
 use crate::my_operation::{Label, OperationalCode, Unresolved};
 use regex::Regex;
 
+pub fn def_pop(elem: String, mut binloc: u16, opcodes_vector: &mut Vec<OperationalCode>) -> u16 {
+    //println!("elem={:?} \n",elem );
+    let strip = Regex::new(r"[[:space:]]+pop[[:space:]]*?[\{]+(.*)[\}]+").unwrap();
+    let rxmany = Regex::new(r"([[:word:]]+)").unwrap();
+    let stripped_variable = &strip.captures(&elem).unwrap()[1];
+    //println!("{:?}\n", stripped_variable);
+    let immediate_count = &rxmany.captures_iter(&elem).count();
+    //println!("COUNT: {:?}\n", immediate_count);
+    if immediate_count > &5 // I only have 5 bytecode instructions! Might be restricted to two ?
+    {
+        panic!("Cannot POP more than 4 registers in {:?}", &elem);
+    }
+
+    let marray = rxmany.captures_iter(stripped_variable);
+
+    // for element in marray
+    // {
+    //     // OK push each of these on the stack
+    //     let fred = element.get(1).unwrap().as_str();
+    //     println!("{:?}\n", fred);
+    // }
+
+
+    let another_opcode: OperationalCode = OperationalCode::new(
+        binloc + crate::bindings::eOpcodes_opcode_Timer_2,
+        crate::bindings::eOpcodes_opcode_load_mar + crate::bindings::eOpcodes_opcode_inc_pc,
+    );
+    opcodes_vector.push(another_opcode);
+    return binloc + 1 as u16;
+
+}
+
+pub fn def_push(elem: String, mut binloc: u16, opcodes_vector: &mut Vec<OperationalCode>) -> u16 {
+    //println!("elem={:?} \n",elem );
+    let strip = Regex::new(r"[[:space:]]*?push[[:space:]]*?[\{]+(.*)[\}]+").unwrap();
+    let rxmany = Regex::new(r"([[:word:]]+)").unwrap();
+    let stripped_variable = &strip.captures(&elem).unwrap()[1];
+    //println!("{:?}\n", stripped_variable);
+    let immediate_count = &rxmany.captures_iter(&elem).count();
+    if immediate_count > &5 // I only have 5 bytecode instructions! Might be restricted to two ?
+    {
+        panic!("Cannot PUSH more than 4 registers in {:?}", &elem);
+    }
+
+    let marray = rxmany.captures_iter(stripped_variable);
+
+    // for element in marray
+    // {
+    //     // OK push each of these on the stack
+    //     let fred = element.get(1).unwrap().as_str();
+    //     println!("{:?}\n", fred); 
+    // }
+
+
+    let another_opcode: OperationalCode = OperationalCode::new(
+        binloc + crate::bindings::eOpcodes_opcode_Timer_2,
+        crate::bindings::eOpcodes_opcode_load_mar + crate::bindings::eOpcodes_opcode_inc_pc,
+    );
+    opcodes_vector.push(another_opcode);
+    return binloc + 1 as u16;
+
+}
+
 pub fn def_store_memory(instr: i32, elem: String, mut binloc: u16, opcodes_vector: &mut Vec<OperationalCode>) -> u16 {
-    println!("elem={:?} \n",elem );
+    //println!("elem={:?} \n",elem );
     /*
         ISSUES
         1 There is a problem here when the offset is a register. So need to check for the # character and assume it 
@@ -29,7 +92,7 @@ pub fn def_store_memory(instr: i32, elem: String, mut binloc: u16, opcodes_vecto
             let rxvariable = Regex::new(r".*[[:space:]]+(\$*-?[[:word:]]+)").unwrap();
             let matched_register = &rx.captures(&elem).unwrap()[1];
             let matched_variable = &rxvariable.captures(&elem).unwrap()[1];
-            println!("matched_register={:?} \t matched_variable={:?}\n",matched_register, matched_variable );
+            //println!("matched_register={:?} \t matched_variable={:?}\n",matched_register, matched_variable );
         }
         1 => { // Load Memory location + Offest (issue 1 & 2)
             let rx = Regex::new(r"[[:space:]]+str[[:space:]]+([[:word:]]+)[[:space:]]+[\[]+.*").unwrap();
@@ -59,13 +122,13 @@ pub fn def_store_memory(instr: i32, elem: String, mut binloc: u16, opcodes_vecto
 
             let matched_register = &rx.captures(&elem).unwrap()[1];
             let matched_variable = &rxlocation.captures(&elem).unwrap()[1];
-            if use_immediate_value
-            {
-                println!("matched_register={:?} \t matched_variable={:?} \t matched_offset={:?}\n",matched_register, matched_variable, rxdigitvalue );
-            }
-            else {
-                println!("matched_register={:?} \t matched_variable={:?} \t matched_offset={:?}\n",matched_register, matched_variable, matched_offset );
-            }
+            // if use_immediate_value
+            // {
+            //     println!("matched_register={:?} \t matched_variable={:?} \t matched_offset={:?}\n",matched_register, matched_variable, rxdigitvalue );
+            // }
+            // else {
+            //     println!("matched_register={:?} \t matched_variable={:?} \t matched_offset={:?}\n",matched_register, matched_variable, matched_offset );
+            // }
 
         }
         _ => {
@@ -84,7 +147,7 @@ pub fn def_store_memory(instr: i32, elem: String, mut binloc: u16, opcodes_vecto
 }
 
 pub fn def_load_memory(instr: i32, elem: String, mut binloc: u16, opcodes_vector: &mut Vec<OperationalCode>) -> u16 {
-    println!("elem={:?} \n",elem );
+    //println!("elem={:?} \n",elem );
     /*
         ISSUES
         1 There is a problem here when the offset is a register. So need to check for the # character and assume it 
@@ -101,7 +164,7 @@ pub fn def_load_memory(instr: i32, elem: String, mut binloc: u16, opcodes_vector
             let rxvariable = Regex::new(r".*[[:space:]]+(\$*-?[[:word:]]+)").unwrap();
             let matched_register = &rx.captures(&elem).unwrap()[1];
             let matched_variable = &rxvariable.captures(&elem).unwrap()[1];
-            println!("matched_register={:?} \t matched_variable={:?}\n",matched_register, matched_variable );
+            //println!("matched_register={:?} \t matched_variable={:?}\n",matched_register, matched_variable );
         }
         1 => { // Load Memory location + Offest (issue 1 & 2)
             let rx = Regex::new(r"[[:space:]]+ldr[[:space:]]+([[:word:]]+)[[:space:]]+[\[]+.*").unwrap();
@@ -131,13 +194,13 @@ pub fn def_load_memory(instr: i32, elem: String, mut binloc: u16, opcodes_vector
 
             let matched_register = &rx.captures(&elem).unwrap()[1];
             let matched_variable = &rxlocation.captures(&elem).unwrap()[1];
-            if use_immediate_value
-            {
-                println!("matched_register={:?} \t matched_variable={:?} \t matched_offset={:?}\n",matched_register, matched_variable, rxdigitvalue );
-            }
-            else {
-                println!("matched_register={:?} \t matched_variable={:?} \t matched_offset={:?}\n",matched_register, matched_variable, matched_offset );
-            }
+            // if use_immediate_value
+            // {
+            //     println!("matched_register={:?} \t matched_variable={:?} \t matched_offset={:?}\n",matched_register, matched_variable, rxdigitvalue );
+            // }
+            // else {
+            //     println!("matched_register={:?} \t matched_variable={:?} \t matched_offset={:?}\n",matched_register, matched_variable, matched_offset );
+            // }
 
         }
         _ => {

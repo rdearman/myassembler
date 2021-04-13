@@ -181,9 +181,12 @@ fn main() {
                     opcodes_vector.push(another_opcode);
                     binloc += 1 as u16;
                 },
-                Token::MEMORYALIAS(inner) => println!("{:?}", inner),
-                Token::PUSH(inner) => println!("{:?}", inner),
-                Token::POP(inner) => println!("{:?}", inner),
+                Token::PUSH(inner) => {
+                    binloc = def_push( inner, binloc, &mut opcodes_vector);
+                }
+                Token::POP(inner) => {
+                    binloc = def_pop( inner, binloc, &mut opcodes_vector);
+                }
                 Token::LABEL(inner) => {
                     def_label(inner, binloc, &mut label_vector);
                     binloc += 1;
@@ -469,7 +472,7 @@ pub enum Token {
     BGT(String),
 
     #[regex(
-        "[[:space:]]+pop[[:space:]]+([[:word:]]+)",
+        "[[:space:]]+pop(.*)",
         lcaseit,
         priority = 1,
         ignore(ascii_case)
@@ -477,7 +480,7 @@ pub enum Token {
     POP(String),
 
     #[regex(
-        "[[:space:]]+push[[:space:]]+([[:word:]]+)",
+        "[[:space:]]+push(.*)",
         lcaseit,
         priority = 1,
         ignore(ascii_case)
@@ -487,8 +490,6 @@ pub enum Token {
     #[regex("([[:word:]]+):", lcaseit, ignore(ascii_case))]
     LABEL(String),
 
-    #[regex("=([[:word:]]+)", lcaseit, ignore(ascii_case))]
-    MEMORYALIAS(String),
 
     // Logos requires one token variant to handle errors,
     // it can be named anything you wish.
